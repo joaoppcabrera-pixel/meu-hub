@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Entrada, CATEGORIAS_ENTRADA } from "@/lib/financeiro-types";
 import { Conta } from "@/lib/financeiro-types";
-import { MESES, MESES_KEYS, formatBRL } from "@/lib/financeiro-data";
+import { MESES, MESES_KEYS, formatBRL, mesDate } from "@/lib/financeiro-data";
 import { Plus, Trash2, TrendingUp, X } from "lucide-react";
+import CurrencyInput from "@/components/ui/CurrencyInput";
 
 interface Props {
   entradas: Entrada[];
@@ -30,7 +31,7 @@ export default function EntradasTab({ entradas, contas, onAdd, onRemove }: Props
   const [modalAberto, setModalAberto] = useState(false);
 
   const entradasMes = entradas
-    .filter((e) => new Date(e.data).getMonth() === mesIdx)
+    .filter((e) => mesDate(e.data) === mesIdx)
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
   const totalMes = entradasMes.reduce((acc, e) => acc + e.valor, 0);
@@ -172,19 +173,19 @@ function ModalEntrada({ contas, onSalvar, onFechar }: {
 }) {
   const hoje = new Date().toISOString().split("T")[0];
   const [descricao, setDescricao] = useState("");
-  const [valor, setValor] = useState("");
+  const [valor, setValor] = useState(0);
   const [data, setData] = useState(hoje);
   const [categoria, setCategoria] = useState(CATEGORIAS_ENTRADA[0]);
   const [contaId, setContaId] = useState(contas[0]?.id ?? "");
 
-  const podeSalvar = descricao.trim() && parseFloat(valor) > 0 && contaId;
+  const podeSalvar = descricao.trim() && valor > 0 && contaId;
 
   function handleSalvar() {
     if (!podeSalvar) return;
     onSalvar({
       id: `ent-${Date.now()}`,
       descricao: descricao.trim(),
-      valor: parseFloat(valor.replace(",", ".")),
+      valor,
       data,
       categoria,
       contaId,
@@ -217,18 +218,11 @@ function ModalEntrada({ contas, onSalvar, onFechar }: {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Valor</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-                <input
-                  type="number"
+              <CurrencyInput
                   value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
-                  placeholder="0,00"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
+                  onChange={setValor}
+                  className="focus:border-emerald-500"
+              />
             </div>
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Data</label>

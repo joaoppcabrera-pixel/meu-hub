@@ -41,6 +41,7 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
       categoria: tipo === "gasto" ? categoria : undefined,
       valores: valoresFinal,
       pagos: linha?.pagos ?? {},
+      pagosContas: linha?.pagosContas ?? {},
     });
   }
 

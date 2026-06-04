@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Reserva, TipoReserva, TIPOS_RESERVA } from "@/lib/financeiro-types";
 import { MESES, MESES_KEYS, formatBRL } from "@/lib/financeiro-data";
 import { Plus, Trash2, Target, TrendingUp, X } from "lucide-react";
+import CurrencyInput from "@/components/ui/CurrencyInput";
 
 interface Props {
   reservas: Reserva[];
@@ -25,14 +26,14 @@ const TIPO_CORES: Record<TipoReserva, { bg: string; text: string }> = {
 export default function ReservasTab({ reservas, onAdd, onUpdate, onRemove }: Props) {
   const [modalAberto, setModalAberto] = useState(false);
   const [aportandoId, setAportandoId] = useState<string | null>(null);
-  const [valorAporte, setValorAporte] = useState("");
+  const [valorAporte, setValorAporte] = useState(0);
 
   const mesAtual = MESES_KEYS[new Date().getMonth()];
   const totalReservado = reservas.reduce((acc, r) => acc + r.saldoAtual, 0);
   const totalMeta = reservas.filter((r) => r.meta).reduce((acc, r) => acc + (r.meta ?? 0), 0);
 
   function handleAporte(reserva: Reserva) {
-    const valor = parseFloat(valorAporte.replace(",", "."));
+    const valor = valorAporte;
     if (!valor) return;
     onUpdate({
       ...reserva,
@@ -40,7 +41,7 @@ export default function ReservasTab({ reservas, onAdd, onUpdate, onRemove }: Pro
       aportes: { ...reserva.aportes, [mesAtual]: (reserva.aportes[mesAtual] ?? 0) + valor },
     });
     setAportandoId(null);
-    setValorAporte("");
+    setValorAporte(0);
   }
 
   return (
@@ -137,28 +138,25 @@ export default function ReservasTab({ reservas, onAdd, onUpdate, onRemove }: Pro
                 {/* Aporte rápido */}
                 {isAportando ? (
                   <div className="flex gap-2 mt-2">
-                    <div className="relative flex-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-                      <input
+                    <div className="flex-1">
+                      <CurrencyInput
                         autoFocus
-                        type="number"
                         value={valorAporte}
-                        onChange={(e) => setValorAporte(e.target.value)}
+                        onChange={setValorAporte}
                         onKeyDown={(e) => e.key === "Enter" && handleAporte(r)}
-                        className="w-full bg-gray-800 border border-indigo-500 rounded-xl pl-9 pr-3 py-2 text-white text-sm focus:outline-none"
-                        placeholder="0,00"
+                        className="border-indigo-500 py-2"
                       />
                     </div>
                     <button onClick={() => handleAporte(r)} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-xl font-medium transition-colors">
                       Confirmar
                     </button>
-                    <button onClick={() => { setAportandoId(null); setValorAporte(""); }} className="px-3 py-2 bg-gray-800 text-gray-400 hover:bg-gray-700 rounded-xl transition-colors">
+                    <button onClick={() => { setAportandoId(null); setValorAporte(0); }} className="px-3 py-2 bg-gray-800 text-gray-400 hover:bg-gray-700 rounded-xl transition-colors">
                       <X size={16} />
                     </button>
                   </div>
                 ) : (
                   <button
-                    onClick={() => { setAportandoId(r.id); setValorAporte(""); }}
+                    onClick={() => { setAportandoId(r.id); setValorAporte(0); }}
                     className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors mt-1"
                   >
                     <TrendingUp size={13} /> Registrar aporte
@@ -183,10 +181,10 @@ export default function ReservasTab({ reservas, onAdd, onUpdate, onRemove }: Pro
 function ModalNovaReserva({ onSalvar, onFechar }: { onSalvar: (r: Reserva) => void; onFechar: () => void }) {
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState<TipoReserva>("cdb");
-  const [saldo, setSaldo] = useState("");
-  const [meta, setMeta] = useState("");
+  const [saldo, setSaldo] = useState(0);
+  const [meta, setMeta] = useState(0);
 
-  const podeSalvar = nome.trim() && parseFloat(saldo) >= 0;
+  const podeSalvar = nome.trim() && saldo >= 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -228,31 +226,11 @@ function ModalNovaReserva({ onSalvar, onFechar }: { onSalvar: (r: Reserva) => vo
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Saldo atual</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-                <input
-                  type="number"
-                  value={saldo}
-                  onChange={(e) => setSaldo(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
-                  placeholder="0,00"
-                  min="0"
-                />
-              </div>
+              <CurrencyInput value={saldo} onChange={setSaldo} />
             </div>
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Meta (opcional)</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-                <input
-                  type="number"
-                  value={meta}
-                  onChange={(e) => setMeta(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
-                  placeholder="0,00"
-                  min="0"
-                />
-              </div>
+              <CurrencyInput value={meta} onChange={setMeta} placeholder="0,00 (opcional)" />
             </div>
           </div>
         </div>
@@ -260,7 +238,7 @@ function ModalNovaReserva({ onSalvar, onFechar }: { onSalvar: (r: Reserva) => vo
         <div className="flex gap-3 p-5 border-t border-gray-800">
           <button onClick={onFechar} className="flex-1 py-2.5 rounded-xl bg-gray-800 text-gray-400 hover:bg-gray-700 text-sm font-medium transition-colors">Cancelar</button>
           <button
-            onClick={() => onSalvar({ id: `res-${Date.now()}`, nome: nome.trim(), tipo, saldoAtual: parseFloat(saldo) || 0, meta: meta ? parseFloat(meta) : undefined, aportes: {} })}
+            onClick={() => onSalvar({ id: `res-${Date.now()}`, nome: nome.trim(), tipo, saldoAtual: saldo, meta: meta > 0 ? meta : undefined, aportes: {} })}
             disabled={!podeSalvar}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
           >

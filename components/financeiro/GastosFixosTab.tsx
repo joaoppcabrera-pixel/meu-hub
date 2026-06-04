@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { LinhaFinanceira, CATEGORIAS_PADRAO } from "@/lib/financeiro-data";
+import { Conta, Cartao } from "@/lib/financeiro-types";
 import ProjecaoAnual from "./ProjecaoAnual";
 import ResumoMes from "./ResumoMes";
 import GastosMes from "./GastosMes";
@@ -11,18 +12,20 @@ import { ChevronDown, ChevronUp, TableProperties, Plus } from "lucide-react";
 interface Props {
   linhas: LinhaFinanceira[];
   categorias: string[];
+  contas: Conta[];
+  cartoes: Cartao[];
   onChange: (linhas: LinhaFinanceira[]) => void;
   onNovaCategoriaFixa: (cat: string) => void;
 }
 
-export default function GastosFixosTab({ linhas, categorias, onChange, onNovaCategoriaFixa }: Props) {
+export default function GastosFixosTab({ linhas, categorias, contas, cartoes, onChange, onNovaCategoriaFixa }: Props) {
   const [tabelaAberta, setTabelaAberta] = useState(false);
-  const [modalAberto, setModalAberto] = useState(false);
+  const [modalDespesa, setModalDespesa] = useState(false);
 
   function handleSalvarDespesa(linha: LinhaFinanceira, novaCategoria?: string) {
     if (novaCategoria) onNovaCategoriaFixa(novaCategoria);
     onChange([...linhas, linha]);
-    setModalAberto(false);
+    setModalDespesa(false);
   }
 
   return (
@@ -33,7 +36,7 @@ export default function GastosFixosTab({ linhas, categorias, onChange, onNovaCat
           <p className="text-gray-400 text-sm mt-0.5">Despesas mensais recorrentes e projeção anual</p>
         </div>
         <button
-          onClick={() => setModalAberto(true)}
+          onClick={() => setModalDespesa(true)}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
         >
           <Plus size={16} /> Nova despesa fixa
@@ -41,7 +44,7 @@ export default function GastosFixosTab({ linhas, categorias, onChange, onNovaCat
       </div>
 
       <ResumoMes linhas={linhas} />
-      <GastosMes linhas={linhas} categorias={categorias} onChange={onChange} />
+      <GastosMes linhas={linhas} categorias={categorias} contas={contas} onChange={onChange} />
 
       <div className="mt-2">
         <button
@@ -55,13 +58,14 @@ export default function GastosFixosTab({ linhas, categorias, onChange, onNovaCat
         {tabelaAberta && <ProjecaoAnual linhas={linhas} onChange={onChange} />}
       </div>
 
-      {modalAberto && (
+      {modalDespesa && (
         <ModalDespesa
           categorias={categorias}
           onSalvar={handleSalvarDespesa}
-          onFechar={() => setModalAberto(false)}
+          onFechar={() => setModalDespesa(false)}
         />
       )}
+
     </div>
   );
 }

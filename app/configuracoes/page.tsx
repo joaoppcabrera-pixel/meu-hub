@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useFinanceiroConfig } from "@/lib/config-store";
+import { useConfig } from "@/lib/hooks/useConfig";
 import ContasBancariasSection from "@/components/configuracoes/ContasBancariasSection";
 import CategoriasSection from "@/components/configuracoes/CategoriasSection";
-import { Wallet } from "lucide-react";
+import { Wallet, Loader2 } from "lucide-react";
 
 type ModuloConfig = "financeiro";
 
@@ -14,7 +14,11 @@ const MODULOS: { id: ModuloConfig; label: string; icon: React.ReactNode }[] = [
 
 export default function Configuracoes() {
   const [modulo, setModulo] = useState<ModuloConfig>("financeiro");
-  const { contas, addConta, updateConta, removeConta, categorias, addCategoria, updateCategoria, removeCategoria } = useFinanceiroConfig();
+  const {
+    contas, addConta, updateConta, removeConta,
+    categorias, addCategoria, updateCategoria, removeCategoria,
+    loading,
+  } = useConfig();
 
   return (
     <div>
@@ -23,9 +27,8 @@ export default function Configuracoes() {
         <p className="text-gray-400 mt-1">Cadastros e personalizações do sistema</p>
       </div>
 
-      {/* Módulos */}
       <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-2xl p-1 mb-8 w-fit">
-        {MODULOS.map((m) => (
+        {MODULOS.map(m => (
           <button
             key={m.id}
             onClick={() => setModulo(m.id)}
@@ -38,23 +41,19 @@ export default function Configuracoes() {
         ))}
       </div>
 
-      {modulo === "financeiro" && (
+      {loading ? (
+        <div className="flex items-center justify-center h-40 gap-3 text-gray-500">
+          <Loader2 size={20} className="animate-spin" />
+          <span className="text-sm">Carregando configurações...</span>
+        </div>
+      ) : modulo === "financeiro" && (
         <div className="flex flex-col gap-10">
-          {/* Divisor */}
           <ContasBancariasSection
-            contas={contas}
-            onAdd={addConta}
-            onUpdate={updateConta}
-            onRemove={removeConta}
+            contas={contas} onAdd={addConta} onUpdate={updateConta} onRemove={removeConta}
           />
-
           <div className="border-t border-gray-800" />
-
           <CategoriasSection
-            categorias={categorias}
-            onAdd={addCategoria}
-            onUpdate={updateCategoria}
-            onRemove={removeCategoria}
+            categorias={categorias} onAdd={addCategoria} onUpdate={updateCategoria} onRemove={removeCategoria}
           />
         </div>
       )}

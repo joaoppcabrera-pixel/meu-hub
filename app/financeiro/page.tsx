@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { linhasIniciais, LinhaFinanceira, CATEGORIAS_PADRAO } from "@/lib/financeiro-data";
-import { Parcelamento, GastoVariavel, Reserva, Entrada, Conta, Cartao } from "@/lib/financeiro-types";
-import { useFinanceiroConfig } from "@/lib/config-store";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { linhasIniciais } from "@/lib/financeiro-data";
+import { Conta, Cartao, faturaCartaoMes } from "@/lib/financeiro-types";
+import { MESES_KEYS } from "@/lib/financeiro-data";
+import { useConfig } from "@/lib/hooks/useConfig";
+import { useLinhasFixas } from "@/lib/hooks/useLinhasFixas";
+import { useEntradas } from "@/lib/hooks/useEntradas";
+import { useParcelamentos } from "@/lib/hooks/useParcelamentos";
+import { useGastosVariaveis } from "@/lib/hooks/useGastosVariaveis";
+import { useReservas } from "@/lib/hooks/useReservas";
+import { useAssinaturas } from "@/lib/hooks/useAssinaturas";
 import { getBanco } from "@/lib/bancos";
 import VisaoGeralTab from "@/components/financeiro/VisaoGeralTab";
 import EntradasTab from "@/components/financeiro/EntradasTab";
@@ -11,28 +18,36 @@ import GastosFixosTab from "@/components/financeiro/GastosFixosTab";
 import CartaoTab from "@/components/financeiro/CartaoTab";
 import GastosVariaveisTab from "@/components/financeiro/GastosVariaveisTab";
 import ReservasTab from "@/components/financeiro/ReservasTab";
-import { LayoutDashboard, TrendingUp, Pin, CreditCard, Receipt, PiggyBank } from "lucide-react";
+import { LayoutDashboard, TrendingUp, Pin, CreditCard, Receipt, PiggyBank, Loader2 } from "lucide-react";
 
 type Aba = "geral" | "entradas" | "fixos" | "cartoes" | "variaveis" | "reservas";
 
 const ABAS: { id: Aba; label: string; icon: React.ReactNode }[] = [
   { id: "geral",     label: "Visão Geral",     icon: <LayoutDashboard size={16} /> },
-  { id: "entradas",  label: "Entradas",         icon: <TrendingUp size={16} />      },
-  { id: "fixos",     label: "Gastos Fixos",     icon: <Pin size={16} />             },
-  { id: "cartoes",   label: "Cartões",           icon: <CreditCard size={16} />     },
-  { id: "variaveis", label: "Gastos Variáveis", icon: <Receipt size={16} />         },
-  { id: "reservas",  label: "Reservas",          icon: <PiggyBank size={16} />      },
+  { id: "variaveis", label: "Gastos Variáveis", icon: <Receipt size={16} />        },
+  { id: "fixos",     label: "Gastos Fixos",     icon: <Pin size={16} />            },
+  { id: "cartoes",   label: "Cartões",           icon: <CreditCard size={16} />    },
+  { id: "entradas",  label: "Entradas",          icon: <TrendingUp size={16} />    },
+  { id: "reservas",  label: "Reservas",          icon: <PiggyBank size={16} />     },
 ];
 
 export default function Financeiro() {
   const [aba, setAba] = useState<Aba>("geral");
-  const { contas: contasBancarias, categorias } = useFinanceiroConfig();
 
-  // Deriva Conta[] e Cartao[] a partir do cadastro de configurações
+  const { contas: contasBancarias, categorias, loading: loadingConfig } = useConfig();
+  const { linhas: linhasFixas, setLinhas: setLinhasFixas, loading: loadingFixas } = useLinhasFixas();
+  const { entradas, loading: loadingEntradas, add: addEntrada, remove: removeEntrada } = useEntradas();
+  const { parcelamentos, loading: loadingParc, add: addParcelamento, update: updateParcelamento, remove: removeParcelamento } = useParcelamentos();
+  const { gastos: gastosVariaveis, loading: loadingGastos, add: addGasto, remove: removeGasto } = useGastosVariaveis();
+  const { reservas, loading: loadingReservas, add: addReserva, update: updateReserva, remove: removeReserva } = useReservas();
+  const { assinaturas, loading: loadingAss, add: addAssinatura, update: updateAssinatura, cancelar: cancelarAssinatura, remove: removeAssinatura } = useAssinaturas();
+
+  const loading = loadingConfig || loadingFixas || loadingEntradas || loadingParc || loadingGastos || loadingReservas || loadingAss;
+
   const contas = useMemo<Conta[]>(() =>
     contasBancarias
-      .filter((c) => c.tipo === "corrente" || c.tipo === "investimento")
-      .map((c) => ({
+      .filter(c => c.tipo === "corrente" || c.tipo === "investimento")
+      .map(c => ({
         id: c.id,
         nome: c.nome,
         banco: getBanco(c.bancoId).nome,
@@ -45,8 +60,8 @@ export default function Financeiro() {
 
   const cartoes = useMemo<Cartao[]>(() =>
     contasBancarias
-      .filter((c) => c.tipo === "cartao")
-      .map((c) => ({
+      .filter(c => c.tipo === "cartao")
+      .map(c => ({
         id: c.id,
         nome: c.nome,
         limite: c.limite ?? 0,
@@ -58,16 +73,59 @@ export default function Financeiro() {
     [contasBancarias]
   );
 
-  const nomesCategoria = useMemo(
-    () => categorias.map((c) => c.nome),
-    [categorias]
+  const nomesCategoria = useMemo(() => categorias.map(c => c.nome), [categorias]);
+
+  // Auto-cria uma linha de fatura para cada cartão que ainda não tem uma
+  const cartoesInicializadosRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (loading) return;
+    const novas = cartoes.filter(c =>
+      !cartoesInicializadosRef.current.has(c.id) &&
+      !linhasFixas.some(l => l.cartaoVinculadoId === c.id)
+    );
+    if (novas.length === 0) return;
+    novas.forEach(c => cartoesInicializadosRef.current.add(c.id));
+    setLinhasFixas([
+      ...linhasFixas,
+      ...novas.map(c => ({
+        id: `fatura-${c.id}`,
+        nome: `Fatura ${c.nome}`,
+        tipo: "gasto" as const,
+        categoria: "Cartões",
+        cartaoVinculadoId: c.id,
+        diaVencimento: c.diaVencimento,
+        valores: Object.fromEntries(MESES_KEYS.map(m => [m, 0])),
+        pagos: {},
+        pagosContas: {},
+      })),
+    ]);
+  }, [cartoes, loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Substitui os valores das linhas vinculadas a cartões pelos valores reais da fatura
+  const linhasComFaturas = useMemo(() =>
+    linhasFixas.map(l => {
+      if (!l.cartaoVinculadoId) return l;
+      const cartao = cartoes.find(c => c.id === l.cartaoVinculadoId);
+      if (!cartao) return l;
+      const valores = Object.fromEntries(
+        MESES_KEYS.map((mes, idx) => [
+          mes,
+          faturaCartaoMes(parcelamentos, gastosVariaveis, cartao.id, idx, cartao.diaFechamento, assinaturas),
+        ])
+      );
+      return { ...l, valores };
+    }),
+    [linhasFixas, cartoes, parcelamentos, gastosVariaveis, assinaturas]
   );
 
-  const [linhasFixas, setLinhasFixas] = useState<LinhaFinanceira[]>(linhasIniciais);
-  const [entradas, setEntradas] = useState<Entrada[]>([]);
-  const [parcelamentos, setParcelamentos] = useState<Parcelamento[]>([]);
-  const [gastosVariaveis, setGastosVariaveis] = useState<GastoVariavel[]>([]);
-  const [reservas, setReservas] = useState<Reserva[]>([]);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64 gap-3 text-gray-500">
+        <Loader2 size={22} className="animate-spin" />
+        <span className="text-sm">Carregando dados...</span>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -77,7 +135,7 @@ export default function Financeiro() {
       </div>
 
       <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-2xl p-1 mb-6 overflow-x-auto">
-        {ABAS.map((a) => (
+        {ABAS.map(a => (
           <button
             key={a.id}
             onClick={() => setAba(a.id)}
@@ -92,45 +150,42 @@ export default function Financeiro() {
 
       {aba === "geral" && (
         <VisaoGeralTab
-          contas={contas} cartoes={cartoes} linhasFixas={linhasFixas}
+          contas={contas} cartoes={cartoes} linhasFixas={linhasComFaturas}
           entradas={entradas} parcelamentos={parcelamentos}
-          gastosVariaveis={gastosVariaveis} reservas={reservas}
+          gastosVariaveis={gastosVariaveis} assinaturas={assinaturas} reservas={reservas}
         />
       )}
       {aba === "entradas" && (
         <EntradasTab
           entradas={entradas} contas={contas}
-          onAdd={(e) => setEntradas((p) => [...p, e])}
-          onRemove={(id) => setEntradas((p) => p.filter((e) => e.id !== id))}
+          onAdd={addEntrada} onRemove={removeEntrada}
         />
       )}
       {aba === "fixos" && (
         <GastosFixosTab
-          linhas={linhasFixas} categorias={nomesCategoria}
+          linhas={linhasComFaturas} categorias={nomesCategoria} contas={contas} cartoes={cartoes}
           onChange={setLinhasFixas}
           onNovaCategoriaFixa={() => {}}
         />
       )}
       {aba === "cartoes" && (
         <CartaoTab
-          cartoes={cartoes} parcelamentos={parcelamentos} gastosVariaveis={gastosVariaveis}
-          onAddParcelamento={(p) => setParcelamentos((prev) => [...prev, p])}
-          onRemoveParcelamento={(id) => setParcelamentos((prev) => prev.filter((p) => p.id !== id))}
+          cartoes={cartoes} parcelamentos={parcelamentos}
+          gastosVariaveis={gastosVariaveis} assinaturas={assinaturas}
+          onAddParcelamento={addParcelamento} onUpdateParcelamento={updateParcelamento} onRemoveParcelamento={removeParcelamento}
+          onAddAssinatura={addAssinatura} onUpdateAssinatura={updateAssinatura} onCancelarAssinatura={cancelarAssinatura} onRemoveAssinatura={removeAssinatura}
         />
       )}
       {aba === "variaveis" && (
         <GastosVariaveisTab
           gastos={gastosVariaveis} cartoes={cartoes} contas={contas}
-          onAdd={(g) => setGastosVariaveis((p) => [...p, g])}
-          onRemove={(id) => setGastosVariaveis((p) => p.filter((g) => g.id !== id))}
+          onAdd={addGasto} onRemove={removeGasto}
         />
       )}
       {aba === "reservas" && (
         <ReservasTab
           reservas={reservas}
-          onAdd={(r) => setReservas((p) => [...p, r])}
-          onUpdate={(r) => setReservas((p) => p.map((x) => (x.id === r.id ? r : x)))}
-          onRemove={(id) => setReservas((p) => p.filter((r) => r.id !== id))}
+          onAdd={addReserva} onUpdate={updateReserva} onRemove={removeReserva}
         />
       )}
     </div>

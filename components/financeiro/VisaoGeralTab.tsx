@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  Conta, Cartao, Parcelamento, GastoVariavel, Reserva, Entrada,
-  saldoConta, faturaCartaoMes, limiteDisponivel,
+  Conta, Cartao, Parcelamento, GastoVariavel, Reserva, Entrada, Assinatura,
+  saldoConta, faturaCartaoMes, limiteDisponivel, statusFatura, mesInvoiceAtual,
 } from "@/lib/financeiro-types";
-import { LinhaFinanceira, MESES_KEYS, formatBRL, calcularNet, calcularTotalMes } from "@/lib/financeiro-data";
+import { LinhaFinanceira, MESES_KEYS, formatBRL, calcularNet, calcularTotalMes, mesDate } from "@/lib/financeiro-data";
 import { Wallet, CreditCard, TrendingDown, PiggyBank, AlertTriangle, CheckCircle, Info, Pin } from "lucide-react";
 
 interface Props {
@@ -14,23 +14,27 @@ interface Props {
   entradas: Entrada[];
   parcelamentos: Parcelamento[];
   gastosVariaveis: GastoVariavel[];
+  assinaturas: Assinatura[];
   reservas: Reserva[];
 }
 
-export default function VisaoGeralTab({ contas, cartoes, linhasFixas, entradas, parcelamentos, gastosVariaveis, reservas }: Props) {
+export default function VisaoGeralTab({ contas, cartoes, linhasFixas, entradas, parcelamentos, gastosVariaveis, assinaturas, reservas }: Props) {
   const mesAtualIdx = new Date().getMonth();
   const proximoMesIdx = Math.min(mesAtualIdx + 1, 11);
   const mesAtual = MESES_KEYS[mesAtualIdx];
 
   // Saldo total cumulativo em conta (acumula desde o início)
-  const saldoTotal = contas.reduce((acc, c) => acc + saldoConta(c, entradas, gastosVariaveis, mesAtualIdx), 0);
+  const saldoTotal = contas.reduce((acc, c) => acc + saldoConta(c, entradas, gastosVariaveis, linhasFixas, mesAtualIdx), 0);
 
-  // Faturas
-  const faturaTotal = cartoes.reduce((acc, c) => acc + faturaCartaoMes(parcelamentos, gastosVariaveis, c.id, mesAtualIdx), 0);
+  // Faturas — usa o mês de invoice de cada cartão (pode ser próximo mês se já fechou)
+  const faturaTotal = cartoes.reduce((acc, c) => {
+    const inv = mesInvoiceAtual(c);
+    return acc + faturaCartaoMes(parcelamentos, gastosVariaveis, c.id, inv, c.diaFechamento, assinaturas);
+  }, 0);
 
   // Gastos variáveis do mês
   const gastosVarMes = gastosVariaveis
-    .filter((g) => new Date(g.data).getMonth() === mesAtualIdx)
+    .filter((g) => mesDate(g.data) === mesAtualIdx)
     .reduce((acc, g) => acc + g.valor, 0);
 
   // Total reservado
@@ -76,7 +80,7 @@ export default function VisaoGeralTab({ contas, cartoes, linhasFixas, entradas, 
 
   // Insights: top categorias gastos variáveis
   const porCategoria = gastosVariaveis
-    .filter((g) => new Date(g.data).getMonth() === mesAtualIdx)
+    .filter((g) => mesDate(g.data) === mesAtualIdx)
     .reduce<Record<string, number>>((acc, g) => {
       acc[g.categoria] = (acc[g.categoria] ?? 0) + g.valor;
       return acc;
@@ -150,7 +154,7 @@ export default function VisaoGeralTab({ contas, cartoes, linhasFixas, entradas, 
             <p className="text-xs text-gray-500 mb-4">Acumulado desde o início · entradas − débitos</p>
             <div className="flex flex-col gap-3">
               {contas.map((c) => {
-                const saldo = saldoConta(c, entradas, gastosVariaveis, mesAtualIdx);
+                const saldo = saldoConta(c, entradas, gastosVariaveis, linhasFixas, mesAtualIdx);
                 return (
                   <div key={c.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -169,14 +173,23 @@ export default function VisaoGeralTab({ contas, cartoes, linhasFixas, entradas, 
           {/* Faturas por cartão */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
             <h4 className="text-sm font-semibold text-white mb-4">Faturas dos cartões</h4>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               {cartoes.map((c) => {
-                const fatura = faturaCartaoMes(parcelamentos, gastosVariaveis, c.id, mesAtualIdx);
+                const inv = mesInvoiceAtual(c);
+                const fatura = faturaCartaoMes(parcelamentos, gastosVariaveis, c.id, inv, c.diaFechamento, assinaturas);
                 const perc = c.limite > 0 ? (fatura / c.limite) * 100 : 0;
+                const status = statusFatura(c);
                 return (
                   <div key={c.id}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm text-gray-300">{c.nome}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-300">{c.nome}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                          status === "aberta" ? "bg-emerald-500/15 text-emerald-400" : "bg-yellow-500/15 text-yellow-400"
+                        }`}>
+                          {status}
+                        </span>
+                      </div>
                       <div className="text-right">
                         <span className="text-sm font-semibold text-white">{formatBRL(fatura)}</span>
                         <span className="text-xs text-gray-500 ml-1.5">de {formatBRL(c.limite)}</span>

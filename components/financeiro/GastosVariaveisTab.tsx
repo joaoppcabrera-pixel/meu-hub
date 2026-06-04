@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GastoVariavel, Cartao, Conta, MEIOS_PAGAMENTO } from "@/lib/financeiro-types";
-import { MESES, MESES_KEYS, formatBRL } from "@/lib/financeiro-data";
+import { MESES, MESES_KEYS, formatBRL, mesDate } from "@/lib/financeiro-data";
 import ModalGastoVariavel from "./ModalGastoVariavel";
 import { Plus, Trash2, Search } from "lucide-react";
 
@@ -38,7 +38,7 @@ export default function GastosVariaveisTab({ gastos, cartoes, contas, onAdd, onR
 
   const gastosFiltrados = gastos
     .filter((g) => {
-      const gMes = new Date(g.data).getMonth();
+      const gMes = mesDate(g.data);
       return gMes === mesIdx && g.descricao.toLowerCase().includes(busca.toLowerCase());
     })
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());

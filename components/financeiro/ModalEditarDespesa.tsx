@@ -9,6 +9,7 @@ import {
   formatBRL,
 } from "@/lib/financeiro-data";
 import { X, Tag, Plus } from "lucide-react";
+import CurrencyInput from "@/components/ui/CurrencyInput";
 
 interface Props {
   linha: LinhaFinanceira;
@@ -32,9 +33,7 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
   const [novaCategoria, setNovaCategoria] = useState("");
 
   // Valor: pega o valor do mês atual como ponto de partida
-  const [valor, setValor] = useState(
-    (linha.valores[mesAtual] ?? 0).toString()
-  );
+  const [valor, setValor] = useState(linha.valores[mesAtual] ?? 0);
 
   // Duração: detecta o mês de fim atual
   const ultimoMesComValor = MESES_KEYS.reduce((ultimo, m, i) =>
@@ -53,7 +52,7 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
   function handleSalvar() {
     if (!podeSalvar) return;
 
-    const valorNum = parseFloat(valor.replace(",", ".")) || 0;
+    const valorNum = valor;
     const novosValores = { ...linha.valores };
     const novosPagos = { ...linha.pagos };
 
@@ -138,17 +137,7 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
               Valor mensal
             </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-              <input
-                type="number"
-                value={valor}
-                onChange={(e) => setValor(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
-                min="0"
-                step="0.01"
-              />
-            </div>
+            <CurrencyInput value={valor} onChange={setValor} />
             {escopo === "so-este-mes" && (
               <p className="text-xs text-gray-500 mt-1.5">
                 Valor atual nos outros meses: {formatBRL(linha.valores[MESES_KEYS.find(m => m !== mesAtual && (linha.valores[m] ?? 0) > 0) ?? mesAtual] ?? 0)}

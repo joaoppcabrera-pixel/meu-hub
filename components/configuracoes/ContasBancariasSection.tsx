@@ -5,6 +5,7 @@ import { ContaBancaria, TipoContaBancaria } from "@/lib/config-store";
 import { BANCOS, getBanco } from "@/lib/bancos";
 import { formatBRL } from "@/lib/financeiro-data";
 import { Plus, Pencil, Trash2, CreditCard, Landmark, TrendingUp, X, ChevronLeft } from "lucide-react";
+import CurrencyInput from "@/components/ui/CurrencyInput";
 
 interface Props {
   contas: ContaBancaria[];
@@ -137,8 +138,8 @@ function ModalConta({ conta, onSalvar, onFechar }: {
   const [bancoId, setBancoId] = useState(conta?.bancoId ?? "");
   const [tipo, setTipo] = useState<TipoContaBancaria>(conta?.tipo ?? "corrente");
   const [nome, setNome] = useState(conta?.nome ?? "");
-  const [saldoInicial, setSaldoInicial] = useState(conta?.saldoInicial?.toString() ?? "0");
-  const [limite, setLimite] = useState(conta?.limite?.toString() ?? "");
+  const [saldoInicial, setSaldoInicial] = useState(conta?.saldoInicial ?? 0);
+  const [limite, setLimite] = useState(conta?.limite ?? 0);
   const [diaFechamento, setDiaFechamento] = useState(conta?.diaFechamento?.toString() ?? "");
   const [diaVencimento, setDiaVencimento] = useState(conta?.diaVencimento?.toString() ?? "");
 
@@ -166,8 +167,8 @@ function ModalConta({ conta, onSalvar, onFechar }: {
       bancoId,
       nome: nome || gerarNome(bancoId, tipo),
       tipo,
-      saldoInicial: parseFloat(saldoInicial) || 0,
-      limite: tipo === "cartao" ? parseFloat(limite) || 0 : undefined,
+      saldoInicial,
+      limite: tipo === "cartao" ? limite : undefined,
       diaFechamento: tipo === "cartao" ? parseInt(diaFechamento) || undefined : undefined,
       diaVencimento: tipo === "cartao" ? parseInt(diaVencimento) || undefined : undefined,
     });
@@ -283,17 +284,7 @@ function ModalConta({ conta, onSalvar, onFechar }: {
             {(tipo === "corrente" || tipo === "investimento") && (
               <div>
                 <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Saldo inicial</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-                  <input
-                    type="number"
-                    value={saldoInicial}
-                    onChange={(e) => setSaldoInicial(e.target.value)}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
+                <CurrencyInput value={saldoInicial} onChange={setSaldoInicial} />
               </div>
             )}
 
@@ -302,17 +293,7 @@ function ModalConta({ conta, onSalvar, onFechar }: {
               <>
                 <div>
                   <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Limite</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-                    <input
-                      type="number"
-                      value={limite}
-                      onChange={(e) => setLimite(e.target.value)}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
-                      placeholder="0,00"
-                      min="0"
-                    />
-                  </div>
+                  <CurrencyInput value={limite} onChange={setLimite} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>

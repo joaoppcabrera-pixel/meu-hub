@@ -8,6 +8,7 @@ import {
   CATEGORIAS_PADRAO,
 } from "@/lib/financeiro-data";
 import { X, Plus, Tag } from "lucide-react";
+import CurrencyInput from "@/components/ui/CurrencyInput";
 
 interface Props {
   categorias: string[];
@@ -22,7 +23,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
   const [categoria, setCategoria] = useState(categorias[0] ?? "Outros");
   const [criandoCategoria, setCriandoCategoria] = useState(false);
   const [novaCategoria, setNovaCategoria] = useState("");
-  const [valor, setValor] = useState("");
+  const [valor, setValor] = useState(0);
   const [duracao, setDuracao] = useState<Duracao>("sem-fim");
   const [mesInicio, setMesInicio] = useState(new Date().getMonth()); // 0-based
   const [mesFim, setMesFim] = useState(11); // dezembro por padrão
@@ -33,7 +34,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
   function handleSalvar() {
     if (!nome.trim() || !categoriaFinal || !valor) return;
 
-    const valorNum = parseFloat(valor.replace(",", ".")) || 0;
+    const valorNum = valor;
 
     const valores: Record<string, number> = {};
     MESES_KEYS.forEach((m, i) => {
@@ -51,7 +52,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
         categoria: categoriaFinal,
         diaVencimento: diaNum >= 1 && diaNum <= 31 ? diaNum : undefined,
         valores,
-        pagos: {},
+        pagos: {}, pagosContas: {},
       },
       criandoCategoria ? categoriaFinal : undefined
     );
@@ -60,7 +61,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
   const podeSalvar =
     nome.trim() &&
     (criandoCategoria ? novaCategoria.trim() : true) &&
-    valor;
+    valor > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -139,18 +140,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
               Valor mensal
             </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-              <input
-                type="number"
-                value={valor}
-                onChange={(e) => setValor(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-gray-600"
-                placeholder="0,00"
-                min="0"
-                step="0.01"
-              />
-            </div>
+            <CurrencyInput value={valor} onChange={setValor} />
           </div>
 
           {/* Dia de vencimento */}

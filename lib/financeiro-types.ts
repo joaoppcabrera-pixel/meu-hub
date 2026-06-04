@@ -1,4 +1,4 @@
-import { MESES_KEYS } from "./financeiro-data";
+import { MESES_KEYS, LinhaFinanceira, mesDate } from "./financeiro-data";
 
 // ── CONTAS ──────────────────────────────────────────────
 export interface Conta {
@@ -69,6 +69,20 @@ export interface Entrada {
   data: string;       // "2026-06-05"
   categoria: string;
   contaId: string;
+}
+
+// ── ASSINATURAS ──────────────────────────────────────────
+
+export interface Assinatura {
+  id: string;
+  cartaoId: string;
+  descricao: string;
+  categoria: string;
+  valor: number;
+  diaCobranca: number; // dia do mês em que é cobrado
+  mesInicio: number;   // 0-based
+  mesFim?: number;     // 0-based; undefined = sem fim
+  ativa: boolean;
 }
 
 // ── RESERVAS E INVESTIMENTOS ─────────────────────────────
@@ -150,11 +164,58 @@ export function totalParcelasCartaoMes(parcelamentos: Parcelamento[], cartaoId: 
   return parcelasDoMes(parcelamentos, cartaoId, mesIdx).reduce((acc, p) => acc + p.valorParcela, 0);
 }
 
-/** Total de gastos variáveis de um cartão num mês */
-export function totalVariaveisCartaoMes(gastos: GastoVariavel[], cartaoId: string, mesIdx: number): number {
+/**
+ * Dado uma data e o dia de fechamento do cartão,
+ * retorna o mês (0-11) em que a despesa cai na fatura.
+ * Se o dia da despesa > diaFechamento, cai na fatura do mês seguinte.
+ */
+export function mesInvoiceGasto(data: string, diaFechamento: number): number {
+  const d = new Date(data + "T12:00:00");
+  const dia = d.getDate();
+  const mes = d.getMonth();
+  return dia > diaFechamento ? (mes + 1) % 12 : mes;
+}
+
+/** Status da fatura atual de um cartão */
+export function statusFatura(cartao: Cartao): "aberta" | "fechada" {
+  const hoje = new Date().getDate();
+  return hoje <= cartao.diaFechamento ? "aberta" : "fechada";
+}
+
+/** Mês da fatura que está sendo acumulada agora (0-11) */
+export function mesInvoiceAtual(cartao: Cartao): number {
+  const hoje = new Date();
+  const dia = hoje.getDate();
+  const mes = hoje.getMonth();
+  return dia > cartao.diaFechamento ? (mes + 1) % 12 : mes;
+}
+
+/** Total de gastos variáveis de um cartão num mês, respeitando o dia de fechamento */
+export function totalVariaveisCartaoMes(
+  gastos: GastoVariavel[],
+  cartaoId: string,
+  mesIdx: number,
+  diaFechamento = 31
+): number {
   return gastos
-    .filter((g) => g.cartaoId === cartaoId && new Date(g.data).getMonth() === mesIdx)
+    .filter((g) => g.cartaoId === cartaoId && mesInvoiceGasto(g.data, diaFechamento) === mesIdx)
     .reduce((acc, g) => acc + g.valor, 0);
+}
+
+/** Total de assinaturas ativas de um cartão num mês */
+export function totalAssinaturasCartaoMes(
+  assinaturas: Assinatura[],
+  cartaoId: string,
+  mesIdx: number
+): number {
+  return assinaturas
+    .filter((a) =>
+      a.cartaoId === cartaoId &&
+      a.ativa &&
+      a.mesInicio <= mesIdx &&
+      (a.mesFim === undefined || a.mesFim >= mesIdx)
+    )
+    .reduce((acc, a) => acc + a.valor, 0);
 }
 
 /** Fatura total estimada de um cartão num mês */
@@ -162,30 +223,36 @@ export function faturaCartaoMes(
   parcelamentos: Parcelamento[],
   gastos: GastoVariavel[],
   cartaoId: string,
-  mesIdx: number
+  mesIdx: number,
+  diaFechamento = 31,
+  assinaturas: Assinatura[] = []
 ): number {
   return (
     totalParcelasCartaoMes(parcelamentos, cartaoId, mesIdx) +
-    totalVariaveisCartaoMes(gastos, cartaoId, mesIdx)
+    totalVariaveisCartaoMes(gastos, cartaoId, mesIdx, diaFechamento) +
+    totalAssinaturasCartaoMes(assinaturas, cartaoId, mesIdx)
   );
 }
 
 /**
  * Saldo cumulativo de uma conta até o mês indicado (inclusive).
- * = saldo inicial + todas as entradas até o mês - todos os débitos até o mês
+ * = saldo inicial + entradas - gastos variáveis débito/pix - gastos fixos pagos desta conta
  */
 export function saldoConta(
   conta: Conta,
   entradas: Entrada[],
   gastos: GastoVariavel[],
+  linhasFixas: LinhaFinanceira[],
   ateMesIdx: number
 ): number {
   let saldo = conta.saldoInicial;
 
   for (let i = 0; i <= ateMesIdx; i++) {
+    const mes = MESES_KEYS[i];
+
     // + entradas recebidas nessa conta no mês i
     saldo += entradas
-      .filter((e) => e.contaId === conta.id && new Date(e.data).getMonth() === i)
+      .filter((e) => e.contaId === conta.id && mesDate(e.data) === i)
       .reduce((acc, e) => acc + e.valor, 0);
 
     // - gastos variáveis débito/pix dessa conta no mês i
@@ -193,9 +260,19 @@ export function saldoConta(
       .filter((g) =>
         g.contaId === conta.id &&
         (g.meio === "debito" || g.meio === "pix") &&
-        new Date(g.data).getMonth() === i
+        mesDate(g.data) === i
       )
       .reduce((acc, g) => acc + g.valor, 0);
+
+    // - gastos fixos pagos desta conta no mês i
+    saldo -= linhasFixas
+      .filter((l) =>
+        l.tipo === "gasto" &&
+        l.pagos[mes] &&
+        l.pagosContas[mes] === conta.id &&
+        (l.valores[mes] ?? 0) > 0
+      )
+      .reduce((acc, l) => acc + (l.valores[mes] ?? 0), 0);
   }
 
   return saldo;

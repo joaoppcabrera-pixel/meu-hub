@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { GastoVariavel, MeioPagamento, MEIOS_PAGAMENTO, Cartao, Conta } from "@/lib/financeiro-types";
-import { CATEGORIAS_PADRAO } from "@/lib/financeiro-data";
+import { GastoVariavel, MeioPagamento, MEIOS_PAGAMENTO, Cartao, Conta, mesInvoiceGasto } from "@/lib/financeiro-types";
+import { CATEGORIAS_PADRAO, MESES } from "@/lib/financeiro-data";
 import { X } from "lucide-react";
+import CurrencyInput from "@/components/ui/CurrencyInput";
 
 interface Props {
   cartoes: Cartao[];
@@ -15,21 +16,21 @@ interface Props {
 export default function ModalGastoVariavel({ cartoes, contas, onSalvar, onFechar }: Props) {
   const hoje = new Date().toISOString().split("T")[0];
   const [descricao, setDescricao] = useState("");
-  const [valor, setValor] = useState("");
+  const [valor, setValor] = useState(0);
   const [data, setData] = useState(hoje);
   const [categoria, setCategoria] = useState(CATEGORIAS_PADRAO[0]);
   const [meio, setMeio] = useState<MeioPagamento>("debito");
   const [cartaoId, setCartaoId] = useState(cartoes[0]?.id ?? "");
   const [contaId, setContaId] = useState(contas[0]?.id ?? "");
 
-  const podeSalvar = descricao.trim() && parseFloat(valor) > 0;
+  const podeSalvar = descricao.trim() && valor > 0;
 
   function handleSalvar() {
     if (!podeSalvar) return;
     onSalvar({
       id: `gv-${Date.now()}`,
       descricao: descricao.trim(),
-      valor: parseFloat(valor.replace(",", ".")),
+      valor,
       data,
       categoria,
       meio,
@@ -66,18 +67,7 @@ export default function ModalGastoVariavel({ cartoes, contas, onSalvar, onFechar
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Valor</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">R$</span>
-                <input
-                  type="number"
-                  value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-9 pr-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
-                  placeholder="0,00"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
+              <CurrencyInput value={valor} onChange={setValor} />
             </div>
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Data</label>
@@ -124,7 +114,7 @@ export default function ModalGastoVariavel({ cartoes, contas, onSalvar, onFechar
           {meio === "credito" && cartoes.length > 0 && (
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Cartão</label>
-              <div className="flex gap-2">
+              <div className="flex gap-2 mb-2">
                 {cartoes.map((c) => (
                   <button
                     key={c.id}
@@ -137,6 +127,21 @@ export default function ModalGastoVariavel({ cartoes, contas, onSalvar, onFechar
                   </button>
                 ))}
               </div>
+              {/* Hint: em qual fatura cai */}
+              {cartaoId && data && (() => {
+                const cartao = cartoes.find(c => c.id === cartaoId);
+                if (!cartao) return null;
+                const invoiceMes = mesInvoiceGasto(data, cartao.diaFechamento);
+                const diaExpensa = new Date(data + "T12:00:00").getDate();
+                const caiProxima = diaExpensa > cartao.diaFechamento;
+                return (
+                  <p className={`text-xs px-3 py-2 rounded-lg ${caiProxima ? "bg-yellow-950/40 text-yellow-400" : "bg-emerald-950/40 text-emerald-400"}`}>
+                    {caiProxima
+                      ? `⚠️ Dia ${diaExpensa} > fechamento (dia ${cartao.diaFechamento}) — cai na fatura de ${MESES[invoiceMes]}`
+                      : `✓ Cai na fatura de ${MESES[invoiceMes]} (fatura atual)`}
+                  </p>
+                );
+              })()}
             </div>
           )}
 
