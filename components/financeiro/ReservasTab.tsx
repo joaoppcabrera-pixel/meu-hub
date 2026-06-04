@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Reserva, TipoReserva, TIPOS_RESERVA, Conta } from "@/lib/financeiro-types";
@@ -52,7 +52,7 @@ export default function ReservasTab({ reservas, contas, onAdd, onUpdate, onRemov
       <div className="flex items-start justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-white">Reservas e Investimentos</h3>
-          <p className="text-gray-400 text-sm mt-0.5">Onde seu dinheiro estÃ¡ guardado</p>
+          <p className="text-gray-400 text-sm mt-0.5">Onde seu dinheiro está guardado</p>
         </div>
         <button
           onClick={() => setModalAberto(true)}
@@ -109,7 +109,7 @@ export default function ReservasTab({ reservas, contas, onAdd, onUpdate, onRemov
                         return (
                           <p className="text-xs text-emerald-400 mt-0.5">
                             +{formatBRL(aporteMes)} em {MESES[new Date().getMonth()]}
-                            {contaNome && <span className="text-emerald-600"> Â· {contaNome}</span>}
+                            {contaNome && <span className="text-emerald-600"> · {contaNome}</span>}
                           </p>
                         );
                       })()}
@@ -144,7 +144,7 @@ export default function ReservasTab({ reservas, contas, onAdd, onUpdate, onRemov
                   </div>
                 )}
 
-                {/* Aporte rÃ¡pido */}
+                {/* Aporte rápido */}
                 {isAportando ? (
                   <div className="flex flex-col gap-2 mt-2">
                     {/* Valor */}
@@ -219,7 +219,7 @@ function ModalNovaReserva({ onSalvar, onFechar }: { onSalvar: (r: Reserva) => vo
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md">
+      <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
           <h3 className="text-white font-semibold text-lg">Nova reserva</h3>
           <button onClick={onFechar} className="text-gray-500 hover:text-white"><X size={20} /></button>
@@ -280,4 +280,3 @@ function ModalNovaReserva({ onSalvar, onFechar }: { onSalvar: (r: Reserva) => vo
     </div>
   );
 }
-

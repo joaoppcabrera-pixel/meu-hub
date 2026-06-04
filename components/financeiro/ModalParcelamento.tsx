@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Parcelamento, Cartao } from "@/lib/financeiro-types";
@@ -52,9 +52,9 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
         </div>
 
         <div className="p-5 flex flex-col gap-4">
-          {/* CartÃ£o */}
+          {/* Cartão */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">CartÃ£o</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Cartão</label>
             <div className="flex gap-2">
               {cartoes.map((c) => (
                 <button
@@ -70,9 +70,9 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
             </div>
           </div>
 
-          {/* DescriÃ§Ã£o */}
+          {/* Descrição */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">DescriÃ§Ã£o</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Descrição</label>
             <input
               autoFocus
               value={descricao}
@@ -101,7 +101,7 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
               <CurrencyInput value={valorParcela} onChange={setValorParcela} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">NÂº de parcelas</label>
+              <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Nº de parcelas</label>
               <input
                 type="number"
                 value={totalParcelas}
@@ -123,7 +123,7 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
             </div>
           )}
 
-          {/* MÃªs de inÃ­cio */}
+          {/* Mês de início */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Primeira parcela em</label>
             <select
@@ -143,12 +143,10 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
             disabled={!podeSalvar}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
           >
-            {isEdicao ? "Salvar alteraÃ§Ãµes" : "Salvar"}
+            {isEdicao ? "Salvar alterações" : "Salvar"}
           </button>
         </div>
       </div>
     </div>
   );
 }
-
-

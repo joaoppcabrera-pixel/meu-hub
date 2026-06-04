@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { LinhaFinanceira, MESES, MESES_KEYS, formatBRL } from "@/lib/financeiro-data";
@@ -10,7 +10,7 @@ interface Props {
   onFechar: () => void;
 }
 
-const CATEGORIAS = ["Moradia", "Impostos", "SaÃºde", "ServiÃ§os", "CartÃµes", "DÃ­vidas", "Investimentos", "Outros"];
+const CATEGORIAS = ["Moradia", "Impostos", "Saúde", "Serviços", "Cartões", "Dívidas", "Investimentos", "Outros"];
 
 export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
   const [nome, setNome] = useState(linha?.nome ?? "");
@@ -65,7 +65,7 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-              placeholder="Ex: Aluguel, SalÃ¡rio..."
+              placeholder="Ex: Aluguel, Salário..."
             />
           </div>
 
@@ -89,7 +89,7 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
             </div>
           </div>
 
-          {/* Categoria (sÃ³ gastos) */}
+          {/* Categoria (só gastos) */}
           {tipo === "gasto" && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Categoria</label>
@@ -115,7 +115,7 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
                     modoValor === m ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                   }`}
                 >
-                  {m === "fixo" ? "Mesmo valor todo mÃªs" : "Valor por mÃªs"}
+                  {m === "fixo" ? "Mesmo valor todo mês" : "Valor por mês"}
                 </button>
               ))}
             </div>
@@ -164,5 +164,3 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
     </div>
   );
 }
-
-

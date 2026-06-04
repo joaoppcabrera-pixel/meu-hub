@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { LinhaFinanceira, MESES, MESES_KEYS } from "@/lib/financeiro-data";
@@ -57,7 +57,7 @@ export default function ModalExcluirDespesa({ linha, mesAtual, onConfirmar, onFe
             Como deseja excluir <span className="text-white font-medium">"{linha.nome}"</span>?
           </p>
 
-          {/* OpÃ§Ãµes */}
+          {/* Opções */}
           <div className="flex flex-col gap-2">
             <button
               onClick={() => setEscopo("so-este-mes")}
@@ -67,9 +67,9 @@ export default function ModalExcluirDespesa({ linha, mesAtual, onConfirmar, onFe
                   : "border-gray-700 hover:border-gray-600 bg-gray-800/40"
               }`}
             >
-              <span className="text-sm font-medium text-white">SÃ³ em {mesAtualLabel}</span>
+              <span className="text-sm font-medium text-white">Só em {mesAtualLabel}</span>
               <span className="text-xs text-gray-500 mt-0.5">
-                Remove apenas o valor deste mÃªs. Meses anteriores e futuros permanecem.
+                Remove apenas o valor deste mês. Meses anteriores e futuros permanecem.
               </span>
             </button>
 
@@ -83,7 +83,7 @@ export default function ModalExcluirDespesa({ linha, mesAtual, onConfirmar, onFe
             >
               <span className="text-sm font-medium text-white">{mesAtualLabel} em diante</span>
               <span className="text-xs text-gray-500 mt-0.5">
-                Zera de {mesAtualLabel} atÃ© dezembro. HistÃ³rico anterior Ã© preservado.
+                Zera de {mesAtualLabel} até dezembro. Histórico anterior é preservado.
               </span>
             </button>
           </div>
@@ -108,5 +108,3 @@ export default function ModalExcluirDespesa({ linha, mesAtual, onConfirmar, onFe
     </div>
   );
 }
-
-

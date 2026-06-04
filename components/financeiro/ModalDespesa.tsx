@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import {
@@ -26,7 +26,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
   const [valor, setValor] = useState(0);
   const [duracao, setDuracao] = useState<Duracao>("sem-fim");
   const [mesInicio, setMesInicio] = useState(new Date().getMonth()); // 0-based
-  const [mesFim, setMesFim] = useState(11); // dezembro por padrÃ£o
+  const [mesFim, setMesFim] = useState(11); // dezembro por padrão
   const [diaVencimento, setDiaVencimento] = useState("");
 
   const categoriaFinal = criandoCategoria ? novaCategoria.trim() : categoria;
@@ -78,14 +78,14 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
           {/* Nome */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-              TÃ­tulo
+              Título
             </label>
             <input
               autoFocus
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-gray-600"
-              placeholder="Ex: Aluguel, Plano de saÃºde..."
+              placeholder="Ex: Aluguel, Plano de saúde..."
             />
           </div>
 
@@ -158,14 +158,14 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
                 min="1"
                 max="31"
               />
-              <span className="text-sm text-gray-500">de cada mÃªs</span>
+              <span className="text-sm text-gray-500">de cada mês</span>
             </div>
           </div>
 
-          {/* MÃªs de inÃ­cio */}
+          {/* Mês de início */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-              ComeÃ§a em
+              Começa em
             </label>
             <select
               value={mesInicio}
@@ -178,10 +178,10 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
             </select>
           </div>
 
-          {/* DuraÃ§Ã£o */}
+          {/* Duração */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-              DuraÃ§Ã£o
+              Duração
             </label>
             <div className="flex gap-2 mb-3">
               <button
@@ -202,7 +202,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
                     : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                 }`}
               >
-                AtÃ© um mÃªs
+                Até um mês
               </button>
             </div>
 
@@ -242,5 +242,3 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
     </div>
   );
 }
-
-

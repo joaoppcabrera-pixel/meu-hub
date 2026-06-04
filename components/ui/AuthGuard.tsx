@@ -20,7 +20,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (user && isLoginPage) router.replace("/");
   }, [user, loading, isLoginPage]);
 
-  // Fecha sidebar ao navegar
+  // Fecha ao navegar
   useEffect(() => { setSidebarAberta(false); }, [pathname]);
 
   if (loading) {
@@ -39,26 +39,30 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-full">
-      {/* Overlay mobile */}
+
+      {/* ── MOBILE: drawer fixo como overlay ── */}
       {sidebarAberta && (
         <div
           className="fixed inset-0 z-20 bg-black/60 md:hidden"
           onClick={() => setSidebarAberta(false)}
         />
       )}
-
-      {/* Sidebar — drawer no mobile, fixo no desktop */}
       <div className={`
-        fixed top-0 left-0 h-full z-30 transition-transform duration-300
-        md:relative md:translate-x-0 md:z-auto
+        fixed inset-y-0 left-0 z-30 md:hidden
+        transition-transform duration-300
         ${sidebarAberta ? "translate-x-0" : "-translate-x-full"}
       `}>
         <Sidebar onClose={() => setSidebarAberta(false)} />
       </div>
 
-      {/* Conteúdo principal */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Header mobile */}
+      {/* ── DESKTOP: sidebar inline no flex ── */}
+      <div className="hidden md:block shrink-0">
+        <Sidebar />
+      </div>
+
+      {/* ── CONTEÚDO PRINCIPAL ── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Header só no mobile */}
         <header className="md:hidden flex items-center gap-3 px-4 py-3 bg-gray-900 border-b border-gray-800 shrink-0">
           <button
             onClick={() => setSidebarAberta(true)}
@@ -73,6 +77,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+
     </div>
   );
 }

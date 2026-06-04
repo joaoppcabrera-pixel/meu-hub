@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { ContaBancaria, TipoContaBancaria } from "@/lib/config-store";
@@ -15,9 +15,9 @@ interface Props {
 }
 
 const TIPO_INFO: Record<TipoContaBancaria, { label: string; icon: React.ReactNode; desc: string }> = {
-  corrente:    { label: "Conta Corrente",   icon: <Landmark size={20} />,  desc: "Para pagamentos e transferÃªncias do dia a dia" },
-  cartao:      { label: "CartÃ£o de CrÃ©dito",icon: <CreditCard size={20} />,desc: "Com limite, data de fechamento e vencimento"  },
-  investimento:{ label: "Investimentos",    icon: <TrendingUp size={20} />,desc: "Conta de custÃ³dia, corretora ou poupanÃ§a"       },
+  corrente:    { label: "Conta Corrente",   icon: <Landmark size={20} />,  desc: "Para pagamentos e transferências do dia a dia" },
+  cartao:      { label: "Cartão de Crédito",icon: <CreditCard size={20} />,desc: "Com limite, data de fechamento e vencimento"  },
+  investimento:{ label: "Investimentos",    icon: <TrendingUp size={20} />,desc: "Conta de custódia, corretora ou poupança"       },
 };
 
 export default function ContasBancariasSection({ contas, onAdd, onUpdate, onRemove }: Props) {
@@ -31,8 +31,8 @@ export default function ContasBancariasSection({ contas, onAdd, onUpdate, onRemo
     <div>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-base font-semibold text-white">Contas BancÃ¡rias</h3>
-          <p className="text-sm text-gray-500 mt-0.5">Bancos, cartÃµes e contas de investimento</p>
+          <h3 className="text-base font-semibold text-white">Contas Bancárias</h3>
+          <p className="text-sm text-gray-500 mt-0.5">Bancos, cartões e contas de investimento</p>
         </div>
         <button
           onClick={() => { setEditando(null); setModalAberto(true); }}
@@ -77,10 +77,10 @@ export default function ContasBancariasSection({ contas, onAdd, onUpdate, onRemo
                             <p className="text-sm font-medium text-white">{conta.nome}</p>
                             <p className="text-xs text-gray-500">
                               {tipo.label}
-                              {conta.tipo === "cartao" && conta.limite ? ` Â· Limite ${formatBRL(conta.limite)}` : ""}
-                              {conta.tipo === "cartao" && conta.diaFechamento ? ` Â· Fecha dia ${conta.diaFechamento}` : ""}
+                              {conta.tipo === "cartao" && conta.limite ? ` · Limite ${formatBRL(conta.limite)}` : ""}
+                              {conta.tipo === "cartao" && conta.diaFechamento ? ` · Fecha dia ${conta.diaFechamento}` : ""}
                               {(conta.tipo === "corrente" || conta.tipo === "investimento") && conta.saldoInicial
-                                ? ` Â· Saldo inicial ${formatBRL(conta.saldoInicial)}`
+                                ? ` · Saldo inicial ${formatBRL(conta.saldoInicial)}`
                                 : ""}
                             </p>
                           </div>
@@ -124,7 +124,7 @@ export default function ContasBancariasSection({ contas, onAdd, onUpdate, onRemo
   );
 }
 
-// â”€â”€ MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── MODAL ──────────────────────────────────────────────────
 
 type Passo = "banco" | "tipo" | "detalhes";
 
@@ -147,7 +147,7 @@ function ModalConta({ conta, onSalvar, onFechar }: {
 
   function gerarNome(bId: string, t: TipoContaBancaria) {
     const b = getBanco(bId);
-    return `${b.nome} â€” ${TIPO_INFO[t].label}`;
+    return `${b.nome} — ${TIPO_INFO[t].label}`;
   }
 
   function handleSelecionarBanco(id: string) {
@@ -177,7 +177,7 @@ function ModalConta({ conta, onSalvar, onFechar }: {
   const podeSalvar = bancoId && tipo && nome.trim();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg">
 
         {/* Header */}
@@ -288,7 +288,7 @@ function ModalConta({ conta, onSalvar, onFechar }: {
               </div>
             )}
 
-            {/* CartÃ£o: limite + datas */}
+            {/* Cartão: limite + datas */}
             {tipo === "cartao" && (
               <>
                 <div>
@@ -335,7 +335,7 @@ function ModalConta({ conta, onSalvar, onFechar }: {
               disabled={!podeSalvar}
               className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
             >
-              {isEdicao ? "Salvar alteraÃ§Ãµes" : "Adicionar conta"}
+              {isEdicao ? "Salvar alterações" : "Adicionar conta"}
             </button>
           </div>
         )}
@@ -343,4 +343,3 @@ function ModalConta({ conta, onSalvar, onFechar }: {
     </div>
   );
 }
-

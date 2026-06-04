@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Cartao } from "@/lib/financeiro-types";
@@ -22,10 +22,10 @@ export default function ModalFaturaCartao({ cartoes, onSalvar, onFechar }: Props
       id: `fatura-${cartaoId}-${Date.now()}`,
       nome: `Fatura ${cartao.nome}`,
       tipo: "gasto",
-      categoria: "CartÃµes",
+      categoria: "Cartões",
       cartaoVinculadoId: cartaoId,
       diaVencimento: cartao.diaVencimento,
-      // valores vazios â€” serÃ£o substituÃ­dos pela fatura calculada em runtime
+      // valores vazios — serão substituídos pela fatura calculada em runtime
       valores: Object.fromEntries(MESES_KEYS.map((m) => [m, 0])),
       pagos: {},
       pagosContas: {},
@@ -36,7 +36,7 @@ export default function ModalFaturaCartao({ cartoes, onSalvar, onFechar }: Props
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm">
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
-          <h3 className="text-white font-semibold text-lg">Fatura do cartÃ£o</h3>
+          <h3 className="text-white font-semibold text-lg">Fatura do cartão</h3>
           <button onClick={onFechar} className="text-gray-500 hover:text-white transition-colors">
             <X size={20} />
           </button>
@@ -44,11 +44,11 @@ export default function ModalFaturaCartao({ cartoes, onSalvar, onFechar }: Props
 
         <div className="p-5 flex flex-col gap-4">
           <p className="text-sm text-gray-400">
-            Cria uma linha de gasto fixo cujo valor Ã© calculado automaticamente a partir da fatura do cartÃ£o selecionado.
+            Cria uma linha de gasto fixo cujo valor é calculado automaticamente a partir da fatura do cartão selecionado.
           </p>
 
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">CartÃ£o</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Cartão</label>
             <div className="flex flex-col gap-2">
               {cartoes.map((c) => (
                 <button
@@ -64,7 +64,7 @@ export default function ModalFaturaCartao({ cartoes, onSalvar, onFechar }: Props
                   <div>
                     <p className="text-sm font-medium text-white">{c.nome}</p>
                     <p className="text-xs text-gray-500">
-                      Fecha dia {c.diaFechamento} Â· Vence dia {c.diaVencimento}
+                      Fecha dia {c.diaFechamento} · Vence dia {c.diaVencimento}
                     </p>
                   </div>
                 </button>
@@ -76,7 +76,7 @@ export default function ModalFaturaCartao({ cartoes, onSalvar, onFechar }: Props
             <div className="flex items-center gap-2 bg-indigo-950/30 border border-indigo-800/40 rounded-xl px-4 py-3">
               <CreditCard size={16} className="text-indigo-400 shrink-0" />
               <p className="text-xs text-indigo-300">
-                CriarÃ¡ <strong>"Fatura {cartao.nome}"</strong> nos gastos fixos. O valor atualiza automaticamente conforme parcelamentos, assinaturas e gastos variÃ¡veis do cartÃ£o.
+                Criará <strong>"Fatura {cartao.nome}"</strong> nos gastos fixos. O valor atualiza automaticamente conforme parcelamentos, assinaturas e gastos variáveis do cartão.
               </p>
             </div>
           )}
@@ -98,5 +98,3 @@ export default function ModalFaturaCartao({ cartoes, onSalvar, onFechar }: Props
     </div>
   );
 }
-
-
