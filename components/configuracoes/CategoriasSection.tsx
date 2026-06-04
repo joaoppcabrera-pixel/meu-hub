@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { CategoriaConfig, CORES_CATEGORIA, getCorCategoria } from "@/lib/config-store";
@@ -30,7 +30,7 @@ export default function CategoriasSection({ categorias, onAdd, onUpdate, onRemov
         </button>
       </div>
 
-      {/* Formulário de nova categoria */}
+      {/* FormulÃ¡rio de nova categoria */}
       {criando && (
         <FormCategoria
           onSalvar={(c) => { onAdd(c); setCriando(false); }}
@@ -71,7 +71,7 @@ export default function CategoriasSection({ categorias, onAdd, onUpdate, onRemov
   );
 }
 
-// ── ITEM DE CATEGORIA ─────────────────────────────────────
+// â”€â”€ ITEM DE CATEGORIA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CategoriaItem({ categoria, onEditar, onExcluir }: {
   categoria: CategoriaConfig;
@@ -100,7 +100,7 @@ function CategoriaItem({ categoria, onEditar, onExcluir }: {
   );
 }
 
-// ── FORMULÁRIO (criar ou editar) ──────────────────────────
+// â”€â”€ FORMULÃRIO (criar ou editar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function FormCategoria({ inicial, onSalvar, onCancelar }: {
   inicial?: CategoriaConfig;
@@ -133,7 +133,7 @@ function FormCategoria({ inicial, onSalvar, onCancelar }: {
           onChange={(e) => setNome(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && podeSalvar && handleSalvar()}
           className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-gray-600"
-          placeholder="Ex: Alimentação, Transporte, Lazer..."
+          placeholder="Ex: AlimentaÃ§Ã£o, Transporte, Lazer..."
         />
       </div>
 
@@ -162,14 +162,14 @@ function FormCategoria({ inicial, onSalvar, onCancelar }: {
       {/* Preview */}
       {nome && (
         <div className="mb-4 flex items-center gap-2">
-          <span className="text-xs text-gray-500">Prévia:</span>
+          <span className="text-xs text-gray-500">PrÃ©via:</span>
           <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${corAtual.bg} ${corAtual.text}`}>
             {nome}
           </span>
         </div>
       )}
 
-      {/* Ações */}
+      {/* AÃ§Ãµes */}
       <div className="flex gap-2">
         <button
           onClick={onCancelar}
@@ -188,3 +188,4 @@ function FormCategoria({ inicial, onSalvar, onCancelar }: {
     </div>
   );
 }
+

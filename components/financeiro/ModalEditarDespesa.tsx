@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import {
@@ -32,10 +32,10 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
   const [diaVencimento, setDiaVencimento] = useState(linha.diaVencimento?.toString() ?? "");
   const [novaCategoria, setNovaCategoria] = useState("");
 
-  // Valor: pega o valor do mês atual como ponto de partida
+  // Valor: pega o valor do mÃªs atual como ponto de partida
   const [valor, setValor] = useState(linha.valores[mesAtual] ?? 0);
 
-  // Duração: detecta o mês de fim atual
+  // DuraÃ§Ã£o: detecta o mÃªs de fim atual
   const ultimoMesComValor = MESES_KEYS.reduce((ultimo, m, i) =>
     (linha.valores[m] ?? 0) > 0 ? i : ultimo, -1);
 
@@ -57,15 +57,15 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
     const novosPagos = { ...linha.pagos };
 
     if (escopo === "so-este-mes") {
-      // Altera apenas o mês atual
+      // Altera apenas o mÃªs atual
       novosValores[mesAtual] = valorNum;
     } else {
-      // Altera do mês atual em diante
+      // Altera do mÃªs atual em diante
       MESES_KEYS.forEach((m, i) => {
-        if (i < mesAtualIdx) return; // mantém meses anteriores intactos
+        if (i < mesAtualIdx) return; // mantÃ©m meses anteriores intactos
         const ativo = duracao === "sem-fim" || i <= mesFim;
         novosValores[m] = ativo ? valorNum : 0;
-        // Se zerou o valor, remove o "pago" para não confundir
+        // Se zerou o valor, remove o "pago" para nÃ£o confundir
         if (!ativo) delete novosPagos[m];
       });
     }
@@ -89,8 +89,8 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
   const mesAtualLabel = MESES[mesAtualIdx];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
+      <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
           <div>
@@ -103,10 +103,10 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
         </div>
 
         <div className="p-5 flex flex-col gap-5">
-          {/* Escopo da edição */}
+          {/* Escopo da ediÃ§Ã£o */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-              Aplicar alteração
+              Aplicar alteraÃ§Ã£o
             </label>
             <div className="flex gap-2">
               <button
@@ -117,7 +117,7 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
                     : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                 }`}
               >
-                Só {mesAtualLabel}
+                SÃ³ {mesAtualLabel}
               </button>
               <button
                 onClick={() => setEscopo("este-e-seguintes")}
@@ -132,7 +132,7 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
             </div>
           </div>
 
-          {/* Valor — sempre editável */}
+          {/* Valor â€” sempre editÃ¡vel */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
               Valor mensal
@@ -145,13 +145,13 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
             )}
           </div>
 
-          {/* Campos extras — só para "este e seguintes" */}
+          {/* Campos extras â€” sÃ³ para "este e seguintes" */}
           {escopo === "este-e-seguintes" && (
             <>
               {/* Nome */}
               <div>
                 <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-                  Título
+                  TÃ­tulo
                 </label>
                 <input
                   value={nome}
@@ -218,14 +218,14 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
                     min="1"
                     max="31"
                   />
-                  <span className="text-sm text-gray-500">de cada mês</span>
+                  <span className="text-sm text-gray-500">de cada mÃªs</span>
                 </div>
               </div>
 
-              {/* Duração */}
+              {/* DuraÃ§Ã£o */}
               <div>
                 <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-                  Duração
+                  DuraÃ§Ã£o
                 </label>
                 <div className="flex gap-2 mb-3">
                   <button
@@ -242,7 +242,7 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
                       duracao === "ate-mes" ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                     }`}
                   >
-                    Até um mês
+                    AtÃ© um mÃªs
                   </button>
                 </div>
                 {duracao === "ate-mes" && (
@@ -274,10 +274,12 @@ export default function ModalEditarDespesa({ linha, mesAtual, categorias, onSalv
             disabled={!podeSalvar}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
           >
-            Salvar alterações
+            Salvar alteraÃ§Ãµes
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+

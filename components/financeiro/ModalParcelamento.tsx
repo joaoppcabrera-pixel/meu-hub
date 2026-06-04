@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Parcelamento, Cartao } from "@/lib/financeiro-types";
@@ -44,17 +44,17 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
+      <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
           <h3 className="text-white font-semibold text-lg">{isEdicao ? "Editar parcelamento" : "Novo parcelamento"}</h3>
           <button onClick={onFechar} className="text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
         </div>
 
         <div className="p-5 flex flex-col gap-4">
-          {/* Cartão */}
+          {/* CartÃ£o */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Cartão</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">CartÃ£o</label>
             <div className="flex gap-2">
               {cartoes.map((c) => (
                 <button
@@ -70,9 +70,9 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
             </div>
           </div>
 
-          {/* Descrição */}
+          {/* DescriÃ§Ã£o */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Descrição</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">DescriÃ§Ã£o</label>
             <input
               autoFocus
               value={descricao}
@@ -101,7 +101,7 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
               <CurrencyInput value={valorParcela} onChange={setValorParcela} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Nº de parcelas</label>
+              <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">NÂº de parcelas</label>
               <input
                 type="number"
                 value={totalParcelas}
@@ -123,7 +123,7 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
             </div>
           )}
 
-          {/* Mês de início */}
+          {/* MÃªs de inÃ­cio */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Primeira parcela em</label>
             <select
@@ -143,10 +143,12 @@ export default function ModalParcelamento({ cartoes, categorias, cartaoPreSeleci
             disabled={!podeSalvar}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
           >
-            {isEdicao ? "Salvar alterações" : "Salvar"}
+            {isEdicao ? "Salvar alteraÃ§Ãµes" : "Salvar"}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+

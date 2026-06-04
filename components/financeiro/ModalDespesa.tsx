@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import {
@@ -26,7 +26,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
   const [valor, setValor] = useState(0);
   const [duracao, setDuracao] = useState<Duracao>("sem-fim");
   const [mesInicio, setMesInicio] = useState(new Date().getMonth()); // 0-based
-  const [mesFim, setMesFim] = useState(11); // dezembro por padrão
+  const [mesFim, setMesFim] = useState(11); // dezembro por padrÃ£o
   const [diaVencimento, setDiaVencimento] = useState("");
 
   const categoriaFinal = criandoCategoria ? novaCategoria.trim() : categoria;
@@ -64,8 +64,8 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
     valor > 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
+      <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
           <h3 className="text-white font-semibold text-lg">Nova despesa fixa</h3>
@@ -78,14 +78,14 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
           {/* Nome */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-              Título
+              TÃ­tulo
             </label>
             <input
               autoFocus
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-gray-600"
-              placeholder="Ex: Aluguel, Plano de saúde..."
+              placeholder="Ex: Aluguel, Plano de saÃºde..."
             />
           </div>
 
@@ -158,14 +158,14 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
                 min="1"
                 max="31"
               />
-              <span className="text-sm text-gray-500">de cada mês</span>
+              <span className="text-sm text-gray-500">de cada mÃªs</span>
             </div>
           </div>
 
-          {/* Mês de início */}
+          {/* MÃªs de inÃ­cio */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-              Começa em
+              ComeÃ§a em
             </label>
             <select
               value={mesInicio}
@@ -178,10 +178,10 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
             </select>
           </div>
 
-          {/* Duração */}
+          {/* DuraÃ§Ã£o */}
           <div>
             <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">
-              Duração
+              DuraÃ§Ã£o
             </label>
             <div className="flex gap-2 mb-3">
               <button
@@ -202,7 +202,7 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
                     : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                 }`}
               >
-                Até um mês
+                AtÃ© um mÃªs
               </button>
             </div>
 
@@ -242,3 +242,5 @@ export default function ModalDespesa({ categorias, onSalvar, onFechar }: Props) 
     </div>
   );
 }
+
+

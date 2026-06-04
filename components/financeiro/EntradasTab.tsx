@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Entrada, CATEGORIAS_ENTRADA } from "@/lib/financeiro-types";
@@ -15,13 +15,13 @@ interface Props {
 }
 
 const CAT_CORES: Record<string, string> = {
-  "Salário":          "text-emerald-400",
+  "SalÃ¡rio":          "text-emerald-400",
   "Freelance":        "text-blue-400",
   "Renda Extra":      "text-indigo-400",
   "Dividendos":       "text-purple-400",
   "Aluguel Recebido": "text-yellow-400",
-  "Restituição":      "text-teal-400",
-  "Bônus":            "text-orange-400",
+  "RestituiÃ§Ã£o":      "text-teal-400",
+  "BÃ´nus":            "text-orange-400",
   "Outros":           "text-gray-400",
 };
 
@@ -55,7 +55,7 @@ export default function EntradasTab({ entradas, contas, onAdd, onRemove }: Props
       <div className="flex items-start justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-white">Entradas</h3>
-          <p className="text-gray-400 text-sm mt-0.5">Salário, renda extra e outros recebimentos</p>
+          <p className="text-gray-400 text-sm mt-0.5">SalÃ¡rio, renda extra e outros recebimentos</p>
         </div>
         <button
           onClick={() => setModalAberto(true)}
@@ -65,7 +65,7 @@ export default function EntradasTab({ entradas, contas, onAdd, onRemove }: Props
         </button>
       </div>
 
-      {/* Seletor de mês */}
+      {/* Seletor de mÃªs */}
       <div className="flex gap-1 overflow-x-auto pb-1 mb-5">
         {MESES.map((m, i) => (
           <button
@@ -85,7 +85,7 @@ export default function EntradasTab({ entradas, contas, onAdd, onRemove }: Props
         <div className="col-span-2 sm:col-span-1 bg-gray-900 border border-gray-800 rounded-2xl p-4">
           <p className="text-xs text-gray-500 mb-1">Total recebido</p>
           <p className="text-xl font-bold text-emerald-400">{formatBRL(totalMes)}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{entradasMes.length} lançamentos</p>
+          <p className="text-xs text-gray-500 mt-0.5">{entradasMes.length} lanÃ§amentos</p>
         </div>
         {topCats.map(([cat, val]) => (
           <div key={cat} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
@@ -131,7 +131,7 @@ export default function EntradasTab({ entradas, contas, onAdd, onRemove }: Props
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className={`text-xs ${CAT_CORES[e.categoria] ?? "text-gray-500"}`}>{e.categoria}</span>
                           {conta && (
-                            <span className="text-xs text-gray-600">· {conta.nome}</span>
+                            <span className="text-xs text-gray-600">Â· {conta.nome}</span>
                           )}
                         </div>
                       </div>
@@ -164,7 +164,7 @@ export default function EntradasTab({ entradas, contas, onAdd, onRemove }: Props
   );
 }
 
-// ── MODAL ──────────────────────────────────────────────────
+// â”€â”€ MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ModalEntrada({ contas, onSalvar, onFechar }: {
   contas: Conta[];
@@ -193,7 +193,7 @@ function ModalEntrada({ contas, onSalvar, onFechar }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
           <h3 className="text-white font-semibold text-lg">Registrar entrada</h3>
@@ -201,16 +201,16 @@ function ModalEntrada({ contas, onSalvar, onFechar }: {
         </div>
 
         <div className="p-5 flex flex-col gap-4">
-          {/* Descrição */}
+          {/* DescriÃ§Ã£o */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Descrição</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">DescriÃ§Ã£o</label>
             <input
               autoFocus
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && podeSalvar && handleSalvar()}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500 placeholder:text-gray-600"
-              placeholder="Ex: Salário maio, Freela XYZ..."
+              placeholder="Ex: SalÃ¡rio maio, Freela XYZ..."
             />
           </div>
 
@@ -269,7 +269,7 @@ function ModalEntrada({ contas, onSalvar, onFechar }: {
                     }`}
                   >
                     <span>{c.nome}</span>
-                    {contaId === c.id && <span className="text-xs text-emerald-400">✓</span>}
+                    {contaId === c.id && <span className="text-xs text-emerald-400">âœ“</span>}
                   </button>
                 ))}
               </div>
@@ -278,7 +278,7 @@ function ModalEntrada({ contas, onSalvar, onFechar }: {
 
           {contas.length === 0 && (
             <p className="text-xs text-yellow-400 bg-yellow-950/30 border border-yellow-800/40 rounded-xl px-3 py-2">
-              Cadastre uma conta bancária em Configurações para registrar entradas.
+              Cadastre uma conta bancÃ¡ria em ConfiguraÃ§Ãµes para registrar entradas.
             </p>
           )}
         </div>
@@ -297,3 +297,4 @@ function ModalEntrada({ contas, onSalvar, onFechar }: {
     </div>
   );
 }
+

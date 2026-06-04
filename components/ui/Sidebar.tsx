@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Wallet, Dumbbell, Apple, Settings, Shield, LogOut } from "lucide-react";
+import { LayoutDashboard, Wallet, Dumbbell, Apple, Settings, Shield, LogOut, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
@@ -12,7 +12,11 @@ const navItems = [
   { href: "/dieta",      label: "Dieta",      icon: Apple           },
 ];
 
-export default function Sidebar() {
+interface Props {
+  onClose?: () => void;
+}
+
+export default function Sidebar({ onClose }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { profile, isAdmin, signOut } = useAuth();
@@ -28,10 +32,21 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-56 bg-gray-900 border-r border-gray-800 flex flex-col py-6 px-3 shrink-0">
-      <div className="mb-8 px-3">
-        <h1 className="text-xl font-bold text-white">Meu Hub</h1>
-        <p className="text-xs text-gray-500 mt-1">Painel pessoal</p>
+    <aside className="w-64 md:w-56 bg-gray-900 border-r border-gray-800 flex flex-col py-6 px-3 h-full shrink-0">
+      {/* Header com botão fechar no mobile */}
+      <div className="mb-8 px-3 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-white">Meu Hub</h1>
+          <p className="text-xs text-gray-500 mt-1">Painel pessoal</p>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden text-gray-500 hover:text-white p-1 rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       <nav className="flex flex-col gap-1 flex-1">
@@ -65,7 +80,6 @@ export default function Sidebar() {
             Admin
           </Link>
         )}
-
         <Link
           href="/configuracoes"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -78,7 +92,6 @@ export default function Sidebar() {
           Configurações
         </Link>
 
-        {/* Usuário logado */}
         <div className="mt-2 px-3 py-2 rounded-lg bg-gray-800/50">
           <p className="text-xs text-white font-medium truncate">{profile?.nome ?? profile?.email ?? "Usuário"}</p>
           <p className="text-xs text-gray-500 capitalize">{profile?.role === "admin" ? "Administrador" : "Usuário"}</p>

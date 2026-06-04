@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { LinhaFinanceira, MESES, MESES_KEYS, formatBRL } from "@/lib/financeiro-data";
@@ -10,7 +10,7 @@ interface Props {
   onFechar: () => void;
 }
 
-const CATEGORIAS = ["Moradia", "Impostos", "Saúde", "Serviços", "Cartões", "Dívidas", "Investimentos", "Outros"];
+const CATEGORIAS = ["Moradia", "Impostos", "SaÃºde", "ServiÃ§os", "CartÃµes", "DÃ­vidas", "Investimentos", "Outros"];
 
 export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
   const [nome, setNome] = useState(linha?.nome ?? "");
@@ -46,8 +46,8 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
+      <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
           <h3 className="text-white font-semibold text-lg">
             {linha ? "Editar linha" : "Nova linha"}
@@ -65,7 +65,7 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-              placeholder="Ex: Aluguel, Salário..."
+              placeholder="Ex: Aluguel, SalÃ¡rio..."
             />
           </div>
 
@@ -89,7 +89,7 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
             </div>
           </div>
 
-          {/* Categoria (só gastos) */}
+          {/* Categoria (sÃ³ gastos) */}
           {tipo === "gasto" && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Categoria</label>
@@ -115,7 +115,7 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
                     modoValor === m ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                   }`}
                 >
-                  {m === "fixo" ? "Mesmo valor todo mês" : "Valor por mês"}
+                  {m === "fixo" ? "Mesmo valor todo mÃªs" : "Valor por mÃªs"}
                 </button>
               ))}
             </div>
@@ -164,3 +164,5 @@ export default function ModalLinha({ linha, onSalvar, onFechar }: Props) {
     </div>
   );
 }
+
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { GastoVariavel, MeioPagamento, MEIOS_PAGAMENTO, Cartao, Conta, mesInvoiceGasto } from "@/lib/financeiro-types";
@@ -45,24 +45,24 @@ export default function ModalGastoVariavel({ cartoes, contas, categorias, gastoE
   const meios: MeioPagamento[] = ["debito", "credito", "pix", "dinheiro", "va"];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
+      <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
           <h3 className="text-white font-semibold text-lg">{isEdicao ? "Editar gasto" : "Registrar gasto"}</h3>
           <button onClick={onFechar} className="text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
         </div>
 
         <div className="p-5 flex flex-col gap-4">
-          {/* Descrição */}
+          {/* DescriÃ§Ã£o */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Descrição</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">DescriÃ§Ã£o</label>
             <input
               autoFocus
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && podeSalvar && handleSalvar()}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-gray-600"
-              placeholder="Ex: Almoço, Uber, Mercado..."
+              placeholder="Ex: AlmoÃ§o, Uber, Mercado..."
             />
           </div>
 
@@ -113,10 +113,10 @@ export default function ModalGastoVariavel({ cartoes, contas, categorias, gastoE
             </div>
           </div>
 
-          {/* Cartão — só se crédito */}
+          {/* CartÃ£o â€” sÃ³ se crÃ©dito */}
           {meio === "credito" && cartoes.length > 0 && (
             <div>
-              <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Cartão</label>
+              <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">CartÃ£o</label>
               <div className="flex gap-2 mb-2">
                 {cartoes.map((c) => (
                   <button
@@ -140,15 +140,15 @@ export default function ModalGastoVariavel({ cartoes, contas, categorias, gastoE
                 return (
                   <p className={`text-xs px-3 py-2 rounded-lg ${caiProxima ? "bg-yellow-950/40 text-yellow-400" : "bg-emerald-950/40 text-emerald-400"}`}>
                     {caiProxima
-                      ? `⚠️ Dia ${diaExpensa} > fechamento (dia ${cartao.diaFechamento}) — cai na fatura de ${MESES[invoiceMes]}`
-                      : `✓ Cai na fatura de ${MESES[invoiceMes]} (fatura atual)`}
+                      ? `âš ï¸ Dia ${diaExpensa} > fechamento (dia ${cartao.diaFechamento}) â€” cai na fatura de ${MESES[invoiceMes]}`
+                      : `âœ“ Cai na fatura de ${MESES[invoiceMes]} (fatura atual)`}
                   </p>
                 );
               })()}
             </div>
           )}
 
-          {/* Conta — se débito ou pix */}
+          {/* Conta â€” se dÃ©bito ou pix */}
           {(meio === "debito" || meio === "pix") && contas.length > 0 && (
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Conta</label>
@@ -176,10 +176,12 @@ export default function ModalGastoVariavel({ cartoes, contas, categorias, gastoE
             disabled={!podeSalvar}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
           >
-            {isEdicao ? "Salvar alterações" : "Registrar"}
+            {isEdicao ? "Salvar alteraÃ§Ãµes" : "Registrar"}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+

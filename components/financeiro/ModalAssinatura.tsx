@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Assinatura, Cartao } from "@/lib/financeiro-types";
@@ -42,8 +42,8 @@ export default function ModalAssinatura({ cartoes, categorias, cartaoPreSelecion
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4">
+      <div className="bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
           <h3 className="text-white font-semibold text-lg">{isEdicao ? "Editar assinatura" : "Nova assinatura"}</h3>
           <button onClick={onFechar} className="text-gray-500 hover:text-white transition-colors">
@@ -52,9 +52,9 @@ export default function ModalAssinatura({ cartoes, categorias, cartaoPreSelecion
         </div>
 
         <div className="p-5 flex flex-col gap-4">
-          {/* Cartão */}
+          {/* CartÃ£o */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Cartão</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">CartÃ£o</label>
             <div className="flex gap-2">
               {cartoes.map((c) => (
                 <button
@@ -70,9 +70,9 @@ export default function ModalAssinatura({ cartoes, categorias, cartaoPreSelecion
             </div>
           </div>
 
-          {/* Descrição */}
+          {/* DescriÃ§Ã£o */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Serviço</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">ServiÃ§o</label>
             <input
               autoFocus
               value={descricao}
@@ -94,14 +94,14 @@ export default function ModalAssinatura({ cartoes, categorias, cartaoPreSelecion
             </select>
           </div>
 
-          {/* Valor e Dia de cobrança */}
+          {/* Valor e Dia de cobranÃ§a */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Valor mensal</label>
               <CurrencyInput value={valor} onChange={setValor} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Dia de cobrança</label>
+              <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Dia de cobranÃ§a</label>
               <input
                 type="number"
                 value={diaCobranca}
@@ -113,9 +113,9 @@ export default function ModalAssinatura({ cartoes, categorias, cartaoPreSelecion
             </div>
           </div>
 
-          {/* Mês de início */}
+          {/* MÃªs de inÃ­cio */}
           <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Começa em</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">ComeÃ§a em</label>
             <select
               value={mesInicio}
               onChange={(e) => setMesInicio(Number(e.target.value))}
@@ -127,7 +127,7 @@ export default function ModalAssinatura({ cartoes, categorias, cartaoPreSelecion
 
           {/* Info */}
           <div className="bg-indigo-950/40 border border-indigo-800/40 rounded-xl px-4 py-3 text-xs text-indigo-300">
-            Cobrado todo mês até você cancelar. Aparece na fatura de cada mês automaticamente.
+            Cobrado todo mÃªs atÃ© vocÃª cancelar. Aparece na fatura de cada mÃªs automaticamente.
           </div>
         </div>
 
@@ -140,10 +140,12 @@ export default function ModalAssinatura({ cartoes, categorias, cartaoPreSelecion
             disabled={!podeSalvar}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
           >
-            {isEdicao ? "Salvar alterações" : "Salvar assinatura"}
+            {isEdicao ? "Salvar alteraÃ§Ãµes" : "Salvar assinatura"}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+

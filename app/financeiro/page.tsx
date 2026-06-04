@@ -137,16 +137,17 @@ export default function Financeiro() {
         <p className="text-gray-400 mt-1">Gestão financeira completa</p>
       </div>
 
-      <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-2xl p-1 mb-6 overflow-x-auto">
+      <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-2xl p-1 mb-6 overflow-x-auto scrollbar-hide">
         {ABAS.map(a => (
           <button
             key={a.id}
             onClick={() => setAba(a.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
               aba === a.id ? "bg-indigo-600 text-white shadow-sm" : "text-gray-400 hover:text-white hover:bg-gray-800"
             }`}
           >
-            {a.icon}{a.label}
+            {a.icon}<span className="hidden sm:inline">{a.label}</span>
+            <span className="sm:hidden">{a.label.split(" ")[0]}</span>
           </button>
         ))}
       </div>
