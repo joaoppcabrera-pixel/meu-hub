@@ -104,12 +104,13 @@ const TOOLS = [
   },
   {
     name: "listar_gastos_recentes",
-    description: "Lista os gastos variáveis mais recentes.",
+    description: "Lista os gastos variáveis. Pode filtrar por conta/cartão específico (ex: 'Caju', 'Santander', 'C6').",
     inputSchema: {
       type: "object",
       properties: {
         limite: { type: "number", description: "Quantidade (padrão: 10)" },
         mes:    { type: "number", description: "Mês 0-11 (padrão: mês atual)" },
+        conta:  { type: "string", description: "Filtrar por nome da conta ou cartão (ex: Caju, Santander, C6)" },
       },
     },
   },
@@ -251,17 +252,16 @@ async function callTool(name: string, args: Record<string, unknown>, userId: str
     const totalFixosPagos = fixosMes.filter(l => l.pagos?.[mesKey]).reduce((a, l) => a + (l.valores?.[mesKey] ?? 0), 0);
     const fixosPendentes = fixosMes.filter(l => !l.pagos?.[mesKey]);
 
-    // Saldo em conta (simplificado)
-    const saldoTotal = (contas ?? [])
+    // Saldo por conta corrente
+    const saldosPorConta = (contas ?? [])
       .filter(c => c.tipo === "corrente")
-      .reduce((acc, c) => {
+      .map(c => {
         let s = Number(c.saldo_inicial ?? 0);
-        // + entradas acumuladas
         s += (entradas ?? []).filter(e => e.conta_id === c.id).reduce((a, e) => a + Number(e.valor), 0);
-        // - débitos acumulados
         s -= (gastos ?? []).filter(g => g.conta_id === c.id && (g.meio === "debito" || g.meio === "pix")).reduce((a, g) => a + Number(g.valor), 0);
-        return acc + s;
-      }, 0);
+        return { nome: c.nome, saldo: s };
+      });
+    const saldoTotal = saldosPorConta.reduce((a, c) => a + c.saldo, 0);
 
     // Faturas dos cartões
     const cartoes = (contas ?? []).filter(c => c.tipo === "cartao");
@@ -292,6 +292,7 @@ async function callTool(name: string, args: Record<string, unknown>, userId: str
       ``,
       `💰 SALDO EM CONTA`,
       `  Total: ${fmtBRL(saldoTotal)}`,
+      ...saldosPorConta.map(c => `  ${c.nome}: ${fmtBRL(c.saldo)}`),
       ``,
       `📥 ENTRADAS DO MÊS`,
       `  Total recebido: ${fmtBRL(totalEntradasMes)}`,
@@ -323,16 +324,36 @@ async function callTool(name: string, args: Record<string, unknown>, userId: str
   if (name === "listar_gastos_recentes") {
     const limite = (args.limite as number) || 10;
     const mesIdx = args.mes !== undefined ? (args.mes as number) : mesAtual();
-    const { data } = await supabase.from("gastos_variaveis").select("*").eq("user_id", userId)
-      .order("data", { ascending: false }).limit(50);
-    const filtrado = (data ?? []).filter(g => new Date(g.data + "T12:00:00").getMonth() === mesIdx).slice(0, limite);
-    if (!filtrado.length) return `Nenhum gasto em ${MESES_LABELS[mesIdx]}.`;
+    const filtroConta = ((args.conta as string) || "").toLowerCase();
+
+    const [{ data }, { data: contas }, { data: cartoes }] = await Promise.all([
+      supabase.from("gastos_variaveis").select("*").eq("user_id", userId).order("data", { ascending: false }).limit(200),
+      supabase.from("contas_bancarias").select("id,nome").eq("user_id", userId).eq("tipo","corrente"),
+      supabase.from("contas_bancarias").select("id,nome").eq("user_id", userId).eq("tipo","cartao"),
+    ]);
+
+    let filtrado = (data ?? []).filter(g => new Date(g.data + "T12:00:00").getMonth() === mesIdx);
+
+    // Filtrar por conta se especificado
+    if (filtroConta) {
+      const contaMatch = [...(contas ?? []), ...(cartoes ?? [])].find(c => c.nome.toLowerCase().includes(filtroConta));
+      if (contaMatch) {
+        filtrado = filtrado.filter(g => g.conta_id === contaMatch.id || g.cartao_id === contaMatch.id);
+      }
+    }
+
+    filtrado = filtrado.slice(0, limite);
+    if (!filtrado.length) return `Nenhum gasto${filtroConta ? ` na conta ${filtroConta}` : ""} em ${MESES_LABELS[mesIdx]}.`;
+
     const total = filtrado.reduce((a, g) => a + Number(g.valor), 0);
     const lista = filtrado.map(g => {
       const d = new Date(g.data + "T12:00:00").toLocaleDateString("pt-BR", { day:"2-digit", month:"2-digit" });
-      return `• ${d} · ${g.descricao} — ${fmtBRL(g.valor)} · ${g.categoria} · ${MEIOS[g.meio] ?? g.meio}`;
+      const contaNome = (contas ?? []).find(c => c.id === g.conta_id)?.nome
+        ?? (cartoes ?? []).find(c => c.id === g.cartao_id)?.nome ?? "";
+      return `• ${d} · ${g.descricao} — ${fmtBRL(g.valor)} · ${g.categoria} · ${MEIOS[g.meio] ?? g.meio}${contaNome ? ` · ${contaNome}` : ""}`;
     }).join("\n");
-    return `Gastos de ${MESES_LABELS[mesIdx]} (${filtrado.length} lançamentos · total ${fmtBRL(total)}):\n\n${lista}`;
+
+    return `Gastos de ${MESES_LABELS[mesIdx]}${filtroConta ? ` (${filtroConta})` : ""} — ${filtrado.length} lançamentos · total ${fmtBRL(total)}:\n\n${lista}`;
   }
 
   // ── listar_gastos_fixos ──────────────────────────────
