@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Wallet, Dumbbell, Apple, Settings, Shield, LogOut, X } from "lucide-react";
+import { LayoutDashboard, Wallet, Dumbbell, Apple, Settings, Shield, LogOut, X, HelpCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
@@ -80,6 +80,17 @@ export default function Sidebar({ onClose }: Props) {
             Admin
           </Link>
         )}
+        <Link
+          href="/ajuda"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            isActive("/ajuda")
+              ? "bg-indigo-600 text-white"
+              : "text-gray-400 hover:bg-gray-800 hover:text-white"
+          }`}
+        >
+          <HelpCircle size={18} />
+          Ajuda
+        </Link>
         <Link
           href="/configuracoes"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
