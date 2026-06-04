@@ -5,6 +5,7 @@ import { useConfig } from "@/lib/hooks/useConfig";
 import { useAuth } from "@/lib/auth-context";
 import ContasBancariasSection from "@/components/configuracoes/ContasBancariasSection";
 import CategoriasSection from "@/components/configuracoes/CategoriasSection";
+import ApiKeysSection from "@/components/configuracoes/ApiKeysSection";
 import { Wallet, Loader2 } from "lucide-react";
 
 type ModuloConfig = "financeiro";
@@ -57,6 +58,8 @@ export default function Configuracoes() {
           <CategoriasSection
             categorias={categorias} onAdd={addCategoria} onUpdate={updateCategoria} onRemove={removeCategoria}
           />
+          <div className="border-t border-gray-800" />
+          <ApiKeysSection />
         </div>
       )}
     </div>

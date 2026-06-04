@@ -40,5 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# MCP (contém credenciais)
+.mcp.json
+mcp/node_modules
+
 .vercel
 .env*
