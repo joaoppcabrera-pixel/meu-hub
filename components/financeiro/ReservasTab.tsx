@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Reserva, TipoReserva, TIPOS_RESERVA } from "@/lib/financeiro-types";
+import { Reserva, TipoReserva, TIPOS_RESERVA, Conta } from "@/lib/financeiro-types";
 import { MESES, MESES_KEYS, formatBRL } from "@/lib/financeiro-data";
 import { Plus, Trash2, Target, TrendingUp, X } from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 
 interface Props {
   reservas: Reserva[];
+  contas: Conta[];
   onAdd: (r: Reserva) => void;
   onUpdate: (r: Reserva) => void;
   onRemove: (id: string) => void;
@@ -23,10 +24,11 @@ const TIPO_CORES: Record<TipoReserva, { bg: string; text: string }> = {
   outros:     { bg: "bg-indigo-500/15", text: "text-indigo-400" },
 };
 
-export default function ReservasTab({ reservas, onAdd, onUpdate, onRemove }: Props) {
+export default function ReservasTab({ reservas, contas, onAdd, onUpdate, onRemove }: Props) {
   const [modalAberto, setModalAberto] = useState(false);
   const [aportandoId, setAportandoId] = useState<string | null>(null);
   const [valorAporte, setValorAporte] = useState(0);
+  const [contaAporte, setContaAporte] = useState(contas[0]?.id ?? "");
 
   const mesAtual = MESES_KEYS[new Date().getMonth()];
   const totalReservado = reservas.reduce((acc, r) => acc + r.saldoAtual, 0);
@@ -39,6 +41,7 @@ export default function ReservasTab({ reservas, onAdd, onUpdate, onRemove }: Pro
       ...reserva,
       saldoAtual: reserva.saldoAtual + valor,
       aportes: { ...reserva.aportes, [mesAtual]: (reserva.aportes[mesAtual] ?? 0) + valor },
+      aportesContas: { ...reserva.aportesContas, [mesAtual]: contaAporte },
     });
     setAportandoId(null);
     setValorAporte(0);
@@ -101,9 +104,15 @@ export default function ReservasTab({ reservas, onAdd, onUpdate, onRemove }: Pro
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-white">{r.nome}</p>
-                      {aporteMes > 0 && (
-                        <p className="text-xs text-emerald-400 mt-0.5">+{formatBRL(aporteMes)} em {MESES[new Date().getMonth()]}</p>
-                      )}
+                      {aporteMes > 0 && (() => {
+                        const contaNome = contas.find(c => c.id === r.aportesContas?.[mesAtual])?.nome;
+                        return (
+                          <p className="text-xs text-emerald-400 mt-0.5">
+                            +{formatBRL(aporteMes)} em {MESES[new Date().getMonth()]}
+                            {contaNome && <span className="text-emerald-600"> · {contaNome}</span>}
+                          </p>
+                        );
+                      })()}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -137,22 +146,44 @@ export default function ReservasTab({ reservas, onAdd, onUpdate, onRemove }: Pro
 
                 {/* Aporte rápido */}
                 {isAportando ? (
-                  <div className="flex gap-2 mt-2">
-                    <div className="flex-1">
-                      <CurrencyInput
-                        autoFocus
-                        value={valorAporte}
-                        onChange={setValorAporte}
-                        onKeyDown={(e) => e.key === "Enter" && handleAporte(r)}
-                        className="border-indigo-500 py-2"
-                      />
+                  <div className="flex flex-col gap-2 mt-2">
+                    {/* Valor */}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <CurrencyInput
+                          autoFocus
+                          value={valorAporte}
+                          onChange={setValorAporte}
+                          onKeyDown={(e) => e.key === "Enter" && handleAporte(r)}
+                          className="border-indigo-500 py-2"
+                        />
+                      </div>
+                      <button onClick={() => handleAporte(r)} disabled={!valorAporte || !contaAporte} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-sm rounded-xl font-medium transition-colors">
+                        Confirmar
+                      </button>
+                      <button onClick={() => { setAportandoId(null); setValorAporte(0); }} className="px-3 py-2 bg-gray-800 text-gray-400 hover:bg-gray-700 rounded-xl transition-colors">
+                        <X size={16} />
+                      </button>
                     </div>
-                    <button onClick={() => handleAporte(r)} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-xl font-medium transition-colors">
-                      Confirmar
-                    </button>
-                    <button onClick={() => { setAportandoId(null); setValorAporte(0); }} className="px-3 py-2 bg-gray-800 text-gray-400 hover:bg-gray-700 rounded-xl transition-colors">
-                      <X size={16} />
-                    </button>
+                    {/* Conta de origem */}
+                    {contas.length > 0 && (
+                      <div className="flex gap-2 flex-wrap">
+                        <span className="text-xs text-gray-500 self-center">Saiu de:</span>
+                        {contas.map((c) => (
+                          <button
+                            key={c.id}
+                            onClick={() => setContaAporte(c.id)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                              contaAporte === c.id
+                                ? "bg-indigo-600 text-white"
+                                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                            }`}
+                          >
+                            {c.nome}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <button
@@ -238,7 +269,7 @@ function ModalNovaReserva({ onSalvar, onFechar }: { onSalvar: (r: Reserva) => vo
         <div className="flex gap-3 p-5 border-t border-gray-800">
           <button onClick={onFechar} className="flex-1 py-2.5 rounded-xl bg-gray-800 text-gray-400 hover:bg-gray-700 text-sm font-medium transition-colors">Cancelar</button>
           <button
-            onClick={() => onSalvar({ id: `res-${Date.now()}`, nome: nome.trim(), tipo, saldoAtual: saldo, meta: meta > 0 ? meta : undefined, aportes: {} })}
+            onClick={() => onSalvar({ id: `res-${Date.now()}`, nome: nome.trim(), tipo, saldoAtual: saldo, meta: meta > 0 ? meta : undefined, aportes: {}, aportesContas: {} })}
             disabled={!podeSalvar}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
           >

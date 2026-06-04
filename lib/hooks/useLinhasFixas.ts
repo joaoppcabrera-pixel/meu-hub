@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { LinhaFinanceira } from "@/lib/financeiro-data";
 
-function toDb(l: LinhaFinanceira) {
+function toDb(l: LinhaFinanceira, userId: string) {
   return {
     id: l.id,
     nome: l.nome,
@@ -14,6 +14,7 @@ function toDb(l: LinhaFinanceira) {
     pagos: l.pagos,
     pagos_contas: l.pagosContas ?? {},
     cartao_vinculado_id: l.cartaoVinculadoId ?? null,
+    user_id: userId,
   };
 }
 
@@ -31,12 +32,14 @@ function fromDb(row: Record<string, unknown>): LinhaFinanceira {
   };
 }
 
-export function useLinhasFixas() {
+export function useLinhasFixas(userId: string | null) {
   const [linhas, setLinhasState] = useState<LinhaFinanceira[]>([]);
   const [loading, setLoading] = useState(true);
   const ref = useRef<LinhaFinanceira[]>([]);
 
   useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    setLoading(true);
     supabase
       .from("linhas_fixas")
       .select("*")
@@ -48,10 +51,10 @@ export function useLinhasFixas() {
         setLinhasState(parsed);
         setLoading(false);
       });
-  }, []);
+  }, [userId]);
 
-  // Recebe o array completo, faz diff e sincroniza só o que mudou
   const setLinhas = useCallback(async (newLinhas: LinhaFinanceira[]) => {
+    if (!userId) return;
     const old = ref.current;
     ref.current = newLinhas;
     setLinhasState(newLinhas);
@@ -64,11 +67,11 @@ export function useLinhasFixas() {
     });
 
     await Promise.all([
-      ...added.map(l => supabase.from("linhas_fixas").insert(toDb(l))),
+      ...added.map(l => supabase.from("linhas_fixas").insert(toDb(l, userId))),
       ...removed.map(l => supabase.from("linhas_fixas").delete().eq("id", l.id)),
-      ...updated.map(l => supabase.from("linhas_fixas").update(toDb(l)).eq("id", l.id)),
+      ...updated.map(l => supabase.from("linhas_fixas").update(toDb(l, userId)).eq("id", l.id)),
     ]);
-  }, []);
+  }, [userId]);
 
   return { linhas, setLinhas, loading };
 }

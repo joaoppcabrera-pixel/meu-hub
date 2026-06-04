@@ -104,7 +104,8 @@ export interface Reserva {
   tipo: TipoReserva;
   saldoAtual: number;
   meta?: number;
-  aportes: Record<string, number>; // "jun" -> valor aportado
+  aportes: Record<string, number>;      // "jun" -> valor total aportado
+  aportesContas: Record<string, string>; // "jun" -> contaId de onde saiu
 }
 
 // ── DADOS INICIAIS ────────────────────────────────────────
@@ -243,6 +244,7 @@ export function saldoConta(
   entradas: Entrada[],
   gastos: GastoVariavel[],
   linhasFixas: LinhaFinanceira[],
+  reservas: Reserva[],
   ateMesIdx: number
 ): number {
   let saldo = conta.saldoInicial;
@@ -273,6 +275,11 @@ export function saldoConta(
         (l.valores[mes] ?? 0) > 0
       )
       .reduce((acc, l) => acc + (l.valores[mes] ?? 0), 0);
+
+    // - aportes em reservas que saíram desta conta no mês i
+    saldo -= reservas
+      .filter((r) => r.aportesContas?.[mes] === conta.id)
+      .reduce((acc, r) => acc + (r.aportes[mes] ?? 0), 0);
   }
 
   return saldo;

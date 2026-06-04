@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useConfig } from "@/lib/hooks/useConfig";
+import { useAuth } from "@/lib/auth-context";
 import ContasBancariasSection from "@/components/configuracoes/ContasBancariasSection";
 import CategoriasSection from "@/components/configuracoes/CategoriasSection";
 import { Wallet, Loader2 } from "lucide-react";
@@ -14,11 +15,12 @@ const MODULOS: { id: ModuloConfig; label: string; icon: React.ReactNode }[] = [
 
 export default function Configuracoes() {
   const [modulo, setModulo] = useState<ModuloConfig>("financeiro");
+  const { user } = useAuth();
   const {
     contas, addConta, updateConta, removeConta,
     categorias, addCategoria, updateCategoria, removeCategoria,
     loading,
-  } = useConfig();
+  } = useConfig(user?.id ?? null);
 
   return (
     <div>

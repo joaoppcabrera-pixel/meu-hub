@@ -24,7 +24,7 @@ export default function VisaoGeralTab({ contas, cartoes, linhasFixas, entradas, 
   const mesAtual = MESES_KEYS[mesAtualIdx];
 
   // Saldo total cumulativo em conta (acumula desde o início)
-  const saldoTotal = contas.reduce((acc, c) => acc + saldoConta(c, entradas, gastosVariaveis, linhasFixas, mesAtualIdx), 0);
+  const saldoTotal = contas.reduce((acc, c) => acc + saldoConta(c, entradas, gastosVariaveis, linhasFixas, reservas, mesAtualIdx), 0);
 
   // Faturas — usa o mês de invoice de cada cartão (pode ser próximo mês se já fechou)
   const faturaTotal = cartoes.reduce((acc, c) => {
@@ -154,7 +154,7 @@ export default function VisaoGeralTab({ contas, cartoes, linhasFixas, entradas, 
             <p className="text-xs text-gray-500 mb-4">Acumulado desde o início · entradas − débitos</p>
             <div className="flex flex-col gap-3">
               {contas.map((c) => {
-                const saldo = saldoConta(c, entradas, gastosVariaveis, linhasFixas, mesAtualIdx);
+                const saldo = saldoConta(c, entradas, gastosVariaveis, linhasFixas, reservas, mesAtualIdx);
                 return (
                   <div key={c.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

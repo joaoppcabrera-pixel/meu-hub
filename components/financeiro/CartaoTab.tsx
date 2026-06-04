@@ -232,45 +232,13 @@ function CartaoSection({
                   ({status})
                 </span>
               </h4>
-              <div className="flex flex-col divide-y divide-gray-800 rounded-xl border border-gray-800 overflow-hidden">
-                {parcelasInvoice.map((p) => {
-                  const num = invoiceMes - p.mesInicio + 1;
-                  return (
-                    <div key={p.id} className="flex justify-between items-center px-3 py-2.5 bg-gray-800/30">
-                      <div>
-                        <p className="text-sm text-white">{p.descricao}</p>
-                        <p className="text-xs text-gray-500">{num}/{p.totalParcelas}x · {p.categoria}</p>
-                      </div>
-                      <span className="text-sm font-semibold text-white">{formatBRL(p.valorParcela)}</span>
-                    </div>
-                  );
-                })}
-                {assinaturasInvoice.map((a) => (
-                  <div key={a.id} className="flex justify-between items-center px-3 py-2.5 bg-indigo-950/20">
-                    <div>
-                      <p className="text-sm text-white">{a.descricao}</p>
-                      <p className="text-xs text-indigo-400">Assinatura · Dia {a.diaCobranca} · {a.categoria}</p>
-                    </div>
-                    <span className="text-sm font-semibold text-white">{formatBRL(a.valor)}</span>
-                  </div>
-                ))}
-                {gastosInvoice.map((g) => (
-                  <div key={g.id} className="flex justify-between items-center px-3 py-2.5 bg-gray-800/30">
-                    <div>
-                      <p className="text-sm text-white">{g.descricao}</p>
-                      <p className="text-xs text-gray-500">{g.categoria} · {new Date(g.data + "T12:00:00").toLocaleDateString("pt-BR")}</p>
-                    </div>
-                    <span className="text-sm font-semibold text-white">{formatBRL(g.valor)}</span>
-                  </div>
-                ))}
-                {parcelasInvoice.length === 0 && assinaturasInvoice.length === 0 && gastosInvoice.length === 0 && (
-                  <p className="text-sm text-gray-600 px-3 py-4 text-center">Nenhum lançamento nesta fatura</p>
-                )}
-                <div className="flex justify-between items-center px-3 py-2.5 bg-gray-800/60">
-                  <span className="text-sm font-semibold text-gray-300">Total estimado</span>
-                  <span className="text-sm font-bold text-white">{formatBRL(faturaAtual)}</span>
-                </div>
-              </div>
+              <ListaFatura
+                parcelasInvoice={parcelasInvoice}
+                assinaturasInvoice={assinaturasInvoice}
+                gastosInvoice={gastosInvoice}
+                invoiceMes={invoiceMes}
+                faturaAtual={faturaAtual}
+              />
             </div>
 
             {/* Projeção */}
@@ -403,6 +371,90 @@ function CartaoSection({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── LISTA DE LANÇAMENTOS DA FATURA COM "EXIBIR MAIS" ──────
+
+const PAGE_SIZE = 10;
+
+function ListaFatura({ parcelasInvoice, assinaturasInvoice, gastosInvoice, invoiceMes, faturaAtual }: {
+  parcelasInvoice: Parcelamento[];
+  assinaturasInvoice: Assinatura[];
+  gastosInvoice: GastoVariavel[];
+  invoiceMes: number;
+  faturaAtual: number;
+}) {
+  const [visiveis, setVisiveis] = useState(PAGE_SIZE);
+
+  const itens = [
+    ...parcelasInvoice.map(p => ({ key: p.id, tipo: "parcela" as const, data: p })),
+    ...assinaturasInvoice.map(a => ({ key: a.id, tipo: "assinatura" as const, data: a })),
+    ...gastosInvoice.map(g => ({ key: g.id, tipo: "gasto" as const, data: g })),
+  ];
+
+  const temMais = visiveis < itens.length;
+
+  return (
+    <div className="flex flex-col rounded-xl border border-gray-800 overflow-hidden">
+      <div className="max-h-[300px] overflow-y-auto divide-y divide-gray-800">
+        {itens.length === 0 && (
+          <p className="text-sm text-gray-600 px-3 py-4 text-center">Nenhum lançamento nesta fatura</p>
+        )}
+
+        {itens.slice(0, visiveis).map(({ key, tipo, data }) => {
+          if (tipo === "parcela") {
+            const p = data as Parcelamento;
+            const num = invoiceMes - p.mesInicio + 1;
+            return (
+              <div key={key} className="flex justify-between items-center px-3 py-2.5 bg-gray-800/30">
+                <div>
+                  <p className="text-sm text-white">{p.descricao}</p>
+                  <p className="text-xs text-gray-500">{num}/{p.totalParcelas}x · {p.categoria}</p>
+                </div>
+                <span className="text-sm font-semibold text-white">{formatBRL(p.valorParcela)}</span>
+              </div>
+            );
+          }
+          if (tipo === "assinatura") {
+            const a = data as Assinatura;
+            return (
+              <div key={key} className="flex justify-between items-center px-3 py-2.5 bg-indigo-950/20">
+                <div>
+                  <p className="text-sm text-white">{a.descricao}</p>
+                  <p className="text-xs text-indigo-400">Assinatura · Dia {a.diaCobranca} · {a.categoria}</p>
+                </div>
+                <span className="text-sm font-semibold text-white">{formatBRL(a.valor)}</span>
+              </div>
+            );
+          }
+          const g = data as GastoVariavel;
+          return (
+            <div key={key} className="flex justify-between items-center px-3 py-2.5 bg-gray-800/30">
+              <div>
+                <p className="text-sm text-white">{g.descricao}</p>
+                <p className="text-xs text-gray-500">{g.categoria} · {new Date(g.data + "T12:00:00").toLocaleDateString("pt-BR")}</p>
+              </div>
+              <span className="text-sm font-semibold text-white">{formatBRL(g.valor)}</span>
+            </div>
+          );
+        })}
+
+        {temMais && (
+          <button
+            onClick={() => setVisiveis(v => v + PAGE_SIZE)}
+            className="w-full px-3 py-2.5 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-950/20 transition-colors text-center"
+          >
+            Exibir mais ({itens.length - visiveis} restantes)
+          </button>
+        )}
+      </div>
+
+      <div className="flex justify-between items-center px-3 py-2.5 bg-gray-800/60 border-t border-gray-700">
+        <span className="text-sm font-semibold text-gray-300">Total estimado</span>
+        <span className="text-sm font-bold text-white">{formatBRL(faturaAtual)}</span>
+      </div>
     </div>
   );
 }

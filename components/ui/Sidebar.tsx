@@ -1,22 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Wallet, Dumbbell, Apple, Settings } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Wallet, Dumbbell, Apple, Settings, Shield, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
-  { href: "/",              label: "Dashboard",   icon: LayoutDashboard },
-  { href: "/financeiro",    label: "Financeiro",  icon: Wallet          },
-  { href: "/treinos",       label: "Treinos",     icon: Dumbbell        },
-  { href: "/dieta",         label: "Dieta",       icon: Apple           },
+  { href: "/",           label: "Dashboard",  icon: LayoutDashboard },
+  { href: "/financeiro", label: "Financeiro", icon: Wallet          },
+  { href: "/treinos",    label: "Treinos",    icon: Dumbbell        },
+  { href: "/dieta",      label: "Dieta",      icon: Apple           },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { profile, isAdmin, signOut } = useAuth();
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
+  }
+
+  async function handleLogout() {
+    await signOut();
+    router.replace("/login");
   }
 
   return (
@@ -26,7 +34,6 @@ export default function Sidebar() {
         <p className="text-xs text-gray-500 mt-1">Painel pessoal</p>
       </div>
 
-      {/* Navegação principal */}
       <nav className="flex flex-col gap-1 flex-1">
         {navItems.map(({ href, label, icon: Icon }) => (
           <Link
@@ -44,8 +51,21 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Configurações no rodapé */}
-      <div className="mt-4 pt-4 border-t border-gray-800">
+      <div className="mt-4 pt-4 border-t border-gray-800 flex flex-col gap-1">
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              isActive("/admin")
+                ? "bg-indigo-600 text-white"
+                : "text-gray-400 hover:bg-gray-800 hover:text-white"
+            }`}
+          >
+            <Shield size={18} />
+            Admin
+          </Link>
+        )}
+
         <Link
           href="/configuracoes"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -57,6 +77,20 @@ export default function Sidebar() {
           <Settings size={18} />
           Configurações
         </Link>
+
+        {/* Usuário logado */}
+        <div className="mt-2 px-3 py-2 rounded-lg bg-gray-800/50">
+          <p className="text-xs text-white font-medium truncate">{profile?.nome ?? profile?.email ?? "Usuário"}</p>
+          <p className="text-xs text-gray-500 capitalize">{profile?.role === "admin" ? "Administrador" : "Usuário"}</p>
+        </div>
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-red-400 transition-colors"
+        >
+          <LogOut size={18} />
+          Sair
+        </button>
       </div>
     </aside>
   );

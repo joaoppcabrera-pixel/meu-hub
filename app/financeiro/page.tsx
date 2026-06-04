@@ -11,6 +11,7 @@ import { useParcelamentos } from "@/lib/hooks/useParcelamentos";
 import { useGastosVariaveis } from "@/lib/hooks/useGastosVariaveis";
 import { useReservas } from "@/lib/hooks/useReservas";
 import { useAssinaturas } from "@/lib/hooks/useAssinaturas";
+import { useAuth } from "@/lib/auth-context";
 import { getBanco } from "@/lib/bancos";
 import VisaoGeralTab from "@/components/financeiro/VisaoGeralTab";
 import EntradasTab from "@/components/financeiro/EntradasTab";
@@ -33,14 +34,16 @@ const ABAS: { id: Aba; label: string; icon: React.ReactNode }[] = [
 
 export default function Financeiro() {
   const [aba, setAba] = useState<Aba>("geral");
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
 
-  const { contas: contasBancarias, categorias, loading: loadingConfig } = useConfig();
-  const { linhas: linhasFixas, setLinhas: setLinhasFixas, loading: loadingFixas } = useLinhasFixas();
-  const { entradas, loading: loadingEntradas, add: addEntrada, remove: removeEntrada } = useEntradas();
-  const { parcelamentos, loading: loadingParc, add: addParcelamento, update: updateParcelamento, remove: removeParcelamento } = useParcelamentos();
-  const { gastos: gastosVariaveis, loading: loadingGastos, add: addGasto, remove: removeGasto } = useGastosVariaveis();
-  const { reservas, loading: loadingReservas, add: addReserva, update: updateReserva, remove: removeReserva } = useReservas();
-  const { assinaturas, loading: loadingAss, add: addAssinatura, update: updateAssinatura, cancelar: cancelarAssinatura, remove: removeAssinatura } = useAssinaturas();
+  const { contas: contasBancarias, categorias, loading: loadingConfig } = useConfig(userId);
+  const { linhas: linhasFixas, setLinhas: setLinhasFixas, loading: loadingFixas } = useLinhasFixas(userId);
+  const { entradas, loading: loadingEntradas, add: addEntrada, remove: removeEntrada } = useEntradas(userId);
+  const { parcelamentos, loading: loadingParc, add: addParcelamento, update: updateParcelamento, remove: removeParcelamento } = useParcelamentos(userId);
+  const { gastos: gastosVariaveis, loading: loadingGastos, add: addGasto, remove: removeGasto } = useGastosVariaveis(userId);
+  const { reservas, loading: loadingReservas, add: addReserva, update: updateReserva, remove: removeReserva } = useReservas(userId);
+  const { assinaturas, loading: loadingAss, add: addAssinatura, update: updateAssinatura, cancelar: cancelarAssinatura, remove: removeAssinatura } = useAssinaturas(userId);
 
   const loading = loadingConfig || loadingFixas || loadingEntradas || loadingParc || loadingGastos || loadingReservas || loadingAss;
 
@@ -184,7 +187,7 @@ export default function Financeiro() {
       )}
       {aba === "reservas" && (
         <ReservasTab
-          reservas={reservas}
+          reservas={reservas} contas={contas}
           onAdd={addReserva} onUpdate={updateReserva} onRemove={removeReserva}
         />
       )}
