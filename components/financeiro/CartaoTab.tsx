@@ -14,6 +14,7 @@ import Link from "next/link";
 
 interface Props {
   cartoes: Cartao[];
+  categorias: string[];
   parcelamentos: Parcelamento[];
   gastosVariaveis: GastoVariavel[];
   assinaturas: Assinatura[];
@@ -29,7 +30,7 @@ interface Props {
 type ModalTipo = "parcelamento" | "assinatura" | null;
 
 export default function CartaoTab({
-  cartoes, parcelamentos, gastosVariaveis, assinaturas,
+  cartoes, categorias, parcelamentos, gastosVariaveis, assinaturas,
   onAddParcelamento, onUpdateParcelamento, onRemoveParcelamento,
   onAddAssinatura, onUpdateAssinatura, onCancelarAssinatura, onRemoveAssinatura,
 }: Props) {
@@ -110,6 +111,7 @@ export default function CartaoTab({
       {modalCartaoId && modalTipo === "parcelamento" && (
         <ModalParcelamento
           cartoes={cartoes}
+          categorias={categorias}
           cartaoPreSelecionado={modalCartaoId}
           parcelamentoEditar={parcelamentoEditar}
           onSalvar={(p) => {
@@ -122,6 +124,7 @@ export default function CartaoTab({
       {modalCartaoId && modalTipo === "assinatura" && (
         <ModalAssinatura
           cartoes={cartoes}
+          categorias={categorias}
           cartaoPreSelecionado={modalCartaoId}
           assinaturaEditar={assinaturaEditar}
           onSalvar={(a) => {

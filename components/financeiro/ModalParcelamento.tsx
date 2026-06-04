@@ -8,17 +8,18 @@ import CurrencyInput from "@/components/ui/CurrencyInput";
 
 interface Props {
   cartoes: Cartao[];
+  categorias: string[];
   cartaoPreSelecionado?: string;
   parcelamentoEditar?: Parcelamento;
   onSalvar: (p: Parcelamento) => void;
   onFechar: () => void;
 }
 
-export default function ModalParcelamento({ cartoes, cartaoPreSelecionado, parcelamentoEditar, onSalvar, onFechar }: Props) {
+export default function ModalParcelamento({ cartoes, categorias, cartaoPreSelecionado, parcelamentoEditar, onSalvar, onFechar }: Props) {
   const isEdicao = !!parcelamentoEditar;
   const [cartaoId, setCartaoId] = useState(parcelamentoEditar?.cartaoId ?? cartaoPreSelecionado ?? cartoes[0]?.id ?? "");
   const [descricao, setDescricao] = useState(parcelamentoEditar?.descricao ?? "");
-  const [categoria, setCategoria] = useState(parcelamentoEditar?.categoria ?? CATEGORIAS_PADRAO[0]);
+  const [categoria, setCategoria] = useState(parcelamentoEditar?.categoria ?? categorias[0] ?? "");
   const [valorParcela, setValorParcela] = useState(parcelamentoEditar?.valorParcela ?? 0);
   const [totalParcelas, setTotalParcelas] = useState(String(parcelamentoEditar?.totalParcelas ?? 1));
   const [mesInicio, setMesInicio] = useState(parcelamentoEditar?.mesInicio ?? new Date().getMonth());
@@ -89,7 +90,7 @@ export default function ModalParcelamento({ cartoes, cartaoPreSelecionado, parce
               onChange={(e) => setCategoria(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
             >
-              {CATEGORIAS_PADRAO.map((c) => <option key={c}>{c}</option>)}
+              {categorias.map((c) => <option key={c}>{c}</option>)}
             </select>
           </div>
 

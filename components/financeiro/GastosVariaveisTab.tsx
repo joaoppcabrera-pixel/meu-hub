@@ -4,13 +4,15 @@ import { useState } from "react";
 import { GastoVariavel, Cartao, Conta, MEIOS_PAGAMENTO } from "@/lib/financeiro-types";
 import { MESES, MESES_KEYS, formatBRL, mesDate } from "@/lib/financeiro-data";
 import ModalGastoVariavel from "./ModalGastoVariavel";
-import { Plus, Trash2, Search } from "lucide-react";
+import { Plus, Trash2, Search, Pencil } from "lucide-react";
 
 interface Props {
   gastos: GastoVariavel[];
   cartoes: Cartao[];
   contas: Conta[];
+  categorias: string[];
   onAdd: (g: GastoVariavel) => void;
+  onUpdate: (g: GastoVariavel) => void;
   onRemove: (id: string) => void;
 }
 
@@ -28,10 +30,11 @@ const MEIO_CORES: Record<string, string> = {
   va: "bg-orange-500/15 text-orange-400",
 };
 
-export default function GastosVariaveisTab({ gastos, cartoes, contas, onAdd, onRemove }: Props) {
+export default function GastosVariaveisTab({ gastos, cartoes, contas, categorias, onAdd, onUpdate, onRemove }: Props) {
   const mesAtualIdx = new Date().getMonth();
   const [mesIdx, setMesIdx] = useState(mesAtualIdx);
   const [modalAberto, setModalAberto] = useState(false);
+  const [gastoEditar, setGastoEditar] = useState<GastoVariavel | undefined>();
   const [busca, setBusca] = useState("");
 
   const mesKey = MESES_KEYS[mesIdx];
@@ -68,7 +71,7 @@ export default function GastosVariaveisTab({ gastos, cartoes, contas, onAdd, onR
           <p className="text-gray-400 text-sm mt-0.5">Registro de gastos do dia a dia</p>
         </div>
         <button
-          onClick={() => setModalAberto(true)}
+          onClick={() => { setGastoEditar(undefined); setModalAberto(true); }}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
         >
           <Plus size={16} /> Registrar gasto
@@ -122,7 +125,7 @@ export default function GastosVariaveisTab({ gastos, cartoes, contas, onAdd, onR
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
           <p className="text-gray-500 text-sm">Nenhum gasto registrado em {MESES[mesIdx]}</p>
           <button
-            onClick={() => setModalAberto(true)}
+            onClick={() => { setGastoEditar(undefined); setModalAberto(true); }}
             className="mt-3 text-indigo-400 text-sm hover:text-indigo-300 transition-colors"
           >
             + Registrar primeiro gasto
@@ -159,8 +162,14 @@ export default function GastosVariaveisTab({ gastos, cartoes, contas, onAdd, onR
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0 ml-4">
-                          <span className="text-sm font-semibold text-white">{formatBRL(g.valor)}</span>
+                        <div className="flex items-center gap-1 shrink-0 ml-4">
+                          <span className="text-sm font-semibold text-white mr-1">{formatBRL(g.valor)}</span>
+                          <button
+                            onClick={() => { setGastoEditar(g); setModalAberto(true); }}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-600 hover:text-indigo-400 p-1.5 rounded-lg"
+                          >
+                            <Pencil size={14} />
+                          </button>
                           <button
                             onClick={() => onRemove(g.id)}
                             className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-600 hover:text-red-400 p-1.5 rounded-lg"
@@ -182,8 +191,14 @@ export default function GastosVariaveisTab({ gastos, cartoes, contas, onAdd, onR
         <ModalGastoVariavel
           cartoes={cartoes}
           contas={contas}
-          onSalvar={(g) => { onAdd(g); setModalAberto(false); }}
-          onFechar={() => setModalAberto(false)}
+          categorias={categorias}
+          gastoEditar={gastoEditar}
+          onSalvar={(g) => {
+            gastoEditar ? onUpdate(g) : onAdd(g);
+            setModalAberto(false);
+            setGastoEditar(undefined);
+          }}
+          onFechar={() => { setModalAberto(false); setGastoEditar(undefined); }}
         />
       )}
     </div>

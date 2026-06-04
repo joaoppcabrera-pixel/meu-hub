@@ -33,10 +33,15 @@ export function useGastosVariaveis(userId: string | null) {
     await supabase.from("gastos_variaveis").insert(toDb(g, userId));
   }
 
+  async function update(g: GastoVariavel) {
+    setGastos(prev => prev.map(x => x.id === g.id ? g : x));
+    await supabase.from("gastos_variaveis").update(toDb(g, userId ?? "")).eq("id", g.id);
+  }
+
   async function remove(id: string) {
     setGastos(prev => prev.filter(g => g.id !== id));
     await supabase.from("gastos_variaveis").delete().eq("id", id);
   }
 
-  return { gastos, loading, add, remove };
+  return { gastos, loading, add, update, remove };
 }

@@ -9,26 +9,29 @@ import CurrencyInput from "@/components/ui/CurrencyInput";
 interface Props {
   cartoes: Cartao[];
   contas: Conta[];
+  categorias: string[];
+  gastoEditar?: GastoVariavel;
   onSalvar: (g: GastoVariavel) => void;
   onFechar: () => void;
 }
 
-export default function ModalGastoVariavel({ cartoes, contas, onSalvar, onFechar }: Props) {
+export default function ModalGastoVariavel({ cartoes, contas, categorias, gastoEditar, onSalvar, onFechar }: Props) {
+  const isEdicao = !!gastoEditar;
   const hoje = new Date().toISOString().split("T")[0];
-  const [descricao, setDescricao] = useState("");
-  const [valor, setValor] = useState(0);
-  const [data, setData] = useState(hoje);
-  const [categoria, setCategoria] = useState(CATEGORIAS_PADRAO[0]);
-  const [meio, setMeio] = useState<MeioPagamento>("debito");
-  const [cartaoId, setCartaoId] = useState(cartoes[0]?.id ?? "");
-  const [contaId, setContaId] = useState(contas[0]?.id ?? "");
+  const [descricao, setDescricao] = useState(gastoEditar?.descricao ?? "");
+  const [valor, setValor] = useState(gastoEditar?.valor ?? 0);
+  const [data, setData] = useState(gastoEditar?.data ?? hoje);
+  const [categoria, setCategoria] = useState(gastoEditar?.categoria ?? categorias[0] ?? "");
+  const [meio, setMeio] = useState<MeioPagamento>(gastoEditar?.meio ?? "debito");
+  const [cartaoId, setCartaoId] = useState(gastoEditar?.cartaoId ?? cartoes[0]?.id ?? "");
+  const [contaId, setContaId] = useState(gastoEditar?.contaId ?? contas[0]?.id ?? "");
 
   const podeSalvar = descricao.trim() && valor > 0;
 
   function handleSalvar() {
     if (!podeSalvar) return;
     onSalvar({
-      id: `gv-${Date.now()}`,
+      id: gastoEditar?.id ?? `gv-${Date.now()}`,
       descricao: descricao.trim(),
       valor,
       data,
@@ -45,7 +48,7 @@ export default function ModalGastoVariavel({ cartoes, contas, onSalvar, onFechar
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-800">
-          <h3 className="text-white font-semibold text-lg">Registrar gasto</h3>
+          <h3 className="text-white font-semibold text-lg">{isEdicao ? "Editar gasto" : "Registrar gasto"}</h3>
           <button onClick={onFechar} className="text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
         </div>
 
@@ -88,7 +91,7 @@ export default function ModalGastoVariavel({ cartoes, contas, onSalvar, onFechar
               onChange={(e) => setCategoria(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
             >
-              {CATEGORIAS_PADRAO.map((c) => <option key={c}>{c}</option>)}
+              {categorias.map((c) => <option key={c}>{c}</option>)}
             </select>
           </div>
 
@@ -173,7 +176,7 @@ export default function ModalGastoVariavel({ cartoes, contas, onSalvar, onFechar
             disabled={!podeSalvar}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
           >
-            Registrar
+            {isEdicao ? "Salvar alterações" : "Registrar"}
           </button>
         </div>
       </div>

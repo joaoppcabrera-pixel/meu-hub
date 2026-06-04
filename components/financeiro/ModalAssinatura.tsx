@@ -8,17 +8,18 @@ import { X } from "lucide-react";
 
 interface Props {
   cartoes: Cartao[];
+  categorias: string[];
   cartaoPreSelecionado?: string;
   assinaturaEditar?: Assinatura;
   onSalvar: (a: Assinatura) => void;
   onFechar: () => void;
 }
 
-export default function ModalAssinatura({ cartoes, cartaoPreSelecionado, assinaturaEditar, onSalvar, onFechar }: Props) {
+export default function ModalAssinatura({ cartoes, categorias, cartaoPreSelecionado, assinaturaEditar, onSalvar, onFechar }: Props) {
   const isEdicao = !!assinaturaEditar;
   const [cartaoId, setCartaoId] = useState(assinaturaEditar?.cartaoId ?? cartaoPreSelecionado ?? cartoes[0]?.id ?? "");
   const [descricao, setDescricao] = useState(assinaturaEditar?.descricao ?? "");
-  const [categoria, setCategoria] = useState(assinaturaEditar?.categoria ?? CATEGORIAS_PADRAO[0]);
+  const [categoria, setCategoria] = useState(assinaturaEditar?.categoria ?? categorias[0] ?? "");
   const [valor, setValor] = useState(assinaturaEditar?.valor ?? 0);
   const [diaCobranca, setDiaCobranca] = useState(String(assinaturaEditar?.diaCobranca ?? ""));
   const [mesInicio, setMesInicio] = useState(assinaturaEditar?.mesInicio ?? new Date().getMonth());
@@ -89,7 +90,7 @@ export default function ModalAssinatura({ cartoes, cartaoPreSelecionado, assinat
               onChange={(e) => setCategoria(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500"
             >
-              {CATEGORIAS_PADRAO.map((c) => <option key={c}>{c}</option>)}
+              {categorias.map((c) => <option key={c}>{c}</option>)}
             </select>
           </div>
 

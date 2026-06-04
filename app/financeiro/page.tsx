@@ -41,7 +41,7 @@ export default function Financeiro() {
   const { linhas: linhasFixas, setLinhas: setLinhasFixas, loading: loadingFixas } = useLinhasFixas(userId);
   const { entradas, loading: loadingEntradas, add: addEntrada, remove: removeEntrada } = useEntradas(userId);
   const { parcelamentos, loading: loadingParc, add: addParcelamento, update: updateParcelamento, remove: removeParcelamento } = useParcelamentos(userId);
-  const { gastos: gastosVariaveis, loading: loadingGastos, add: addGasto, remove: removeGasto } = useGastosVariaveis(userId);
+  const { gastos: gastosVariaveis, loading: loadingGastos, add: addGasto, update: updateGasto, remove: removeGasto } = useGastosVariaveis(userId);
   const { reservas, loading: loadingReservas, add: addReserva, update: updateReserva, remove: removeReserva } = useReservas(userId);
   const { assinaturas, loading: loadingAss, add: addAssinatura, update: updateAssinatura, cancelar: cancelarAssinatura, remove: removeAssinatura } = useAssinaturas(userId);
 
@@ -173,7 +173,7 @@ export default function Financeiro() {
       )}
       {aba === "cartoes" && (
         <CartaoTab
-          cartoes={cartoes} parcelamentos={parcelamentos}
+          cartoes={cartoes} categorias={nomesCategoria} parcelamentos={parcelamentos}
           gastosVariaveis={gastosVariaveis} assinaturas={assinaturas}
           onAddParcelamento={addParcelamento} onUpdateParcelamento={updateParcelamento} onRemoveParcelamento={removeParcelamento}
           onAddAssinatura={addAssinatura} onUpdateAssinatura={updateAssinatura} onCancelarAssinatura={cancelarAssinatura} onRemoveAssinatura={removeAssinatura}
@@ -181,8 +181,8 @@ export default function Financeiro() {
       )}
       {aba === "variaveis" && (
         <GastosVariaveisTab
-          gastos={gastosVariaveis} cartoes={cartoes} contas={contas}
-          onAdd={addGasto} onRemove={removeGasto}
+          gastos={gastosVariaveis} cartoes={cartoes} contas={contas} categorias={nomesCategoria}
+          onAdd={addGasto} onUpdate={updateGasto} onRemove={removeGasto}
         />
       )}
       {aba === "reservas" && (
