@@ -28,8 +28,11 @@ export async function GET() {
 // ── AUTENTICAÇÃO POR API KEY ──────────────────────────────
 
 async function getUserId(req: NextRequest): Promise<string | null> {
+  // Aceita chave via Authorization header OU query param ?key=
   const auth = req.headers.get("authorization") ?? "";
-  const key = auth.replace(/^Bearer\s+/i, "").trim();
+  const fromHeader = auth.replace(/^Bearer\s+/i, "").trim();
+  const fromQuery = req.nextUrl.searchParams.get("key") ?? "";
+  const key = fromHeader || fromQuery;
   if (!key) return null;
 
   const { data } = await supabase
