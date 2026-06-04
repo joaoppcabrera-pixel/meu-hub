@@ -156,6 +156,17 @@ const TOOLS = [
     inputSchema: { type: "object", properties: {} },
   },
   {
+    name: "detalhe_conta",
+    description: "Mostra o extrato detalhado de uma conta específica: saldo inicial, todas as entradas e todos os débitos vinculados a ela.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        conta: { type: "string", description: "Nome da conta (ex: Caju, Santander)" },
+      },
+      required: ["conta"],
+    },
+  },
+  {
     name: "listar_categorias",
     description: "Lista as categorias de despesas disponíveis.",
     inputSchema: { type: "object", properties: {} },
@@ -252,14 +263,18 @@ async function callTool(name: string, args: Record<string, unknown>, userId: str
     const totalFixosPagos = fixosMes.filter(l => l.pagos?.[mesKey]).reduce((a, l) => a + (l.valores?.[mesKey] ?? 0), 0);
     const fixosPendentes = fixosMes.filter(l => !l.pagos?.[mesKey]);
 
-    // Saldo por conta corrente
+    // Saldo por conta corrente (cumulativo — soma todas as entradas e subtrai todos os débitos históricos)
     const saldosPorConta = (contas ?? [])
       .filter(c => c.tipo === "corrente")
       .map(c => {
-        let s = Number(c.saldo_inicial ?? 0);
-        s += (entradas ?? []).filter(e => e.conta_id === c.id).reduce((a, e) => a + Number(e.valor), 0);
-        s -= (gastos ?? []).filter(g => g.conta_id === c.id && (g.meio === "debito" || g.meio === "pix")).reduce((a, g) => a + Number(g.valor), 0);
-        return { nome: c.nome, saldo: s };
+        const totalEntradas = (entradas ?? [])
+          .filter(e => e.conta_id === c.id)
+          .reduce((a, e) => a + Number(e.valor), 0);
+        const totalDebitos = (gastos ?? [])
+          .filter(g => g.conta_id === c.id && (g.meio === "debito" || g.meio === "pix"))
+          .reduce((a, g) => a + Number(g.valor), 0);
+        const saldo = Number(c.saldo_inicial ?? 0) + totalEntradas - totalDebitos;
+        return { nome: c.nome, saldo, totalEntradas, totalDebitos, saldoInicial: Number(c.saldo_inicial ?? 0) };
       });
     const saldoTotal = saldosPorConta.reduce((a, c) => a + c.saldo, 0);
 
@@ -292,7 +307,9 @@ async function callTool(name: string, args: Record<string, unknown>, userId: str
       ``,
       `💰 SALDO EM CONTA`,
       `  Total: ${fmtBRL(saldoTotal)}`,
-      ...saldosPorConta.map(c => `  ${c.nome}: ${fmtBRL(c.saldo)}`),
+      ...saldosPorConta.map(c =>
+        `  ${c.nome}: ${fmtBRL(c.saldo)} (inicial ${fmtBRL(c.saldoInicial)} + entradas ${fmtBRL(c.totalEntradas)} - débitos ${fmtBRL(c.totalDebitos)})`
+      ),
       ``,
       `📥 ENTRADAS DO MÊS`,
       `  Total recebido: ${fmtBRL(totalEntradasMes)}`,
@@ -427,6 +444,46 @@ async function callTool(name: string, args: Record<string, unknown>, userId: str
     const listaAtivas = ativas.map(s => `• ${s.descricao} — ${fmtBRL(Number(s.valor))}/mês · Dia ${s.dia_cobranca} · ${s.categoria}`).join("\n");
     const listaCanceladas = canceladas.length > 0 ? `\n\nCanceladas:\n${canceladas.map(s => `• ~~${s.descricao}~~ — ${fmtBRL(Number(s.valor))}/mês`).join("\n")}` : "";
     return `Assinaturas ativas (${ativas.length} · ${fmtBRL(totalMes)}/mês):\n\n${listaAtivas}${listaCanceladas}`;
+  }
+
+  // ── detalhe_conta ────────────────────────────────────
+  if (name === "detalhe_conta") {
+    const busca = ((args.conta as string) || "").toLowerCase();
+    const { data: contas } = await supabase.from("contas_bancarias").select("*").eq("user_id", userId);
+    const conta = (contas ?? []).find(c => c.nome.toLowerCase().includes(busca));
+    if (!conta) return `Conta "${args.conta}" não encontrada. Contas disponíveis: ${(contas ?? []).map(c => c.nome).join(", ")}`;
+
+    const [{ data: entradasConta }, { data: gastosConta }] = await Promise.all([
+      supabase.from("entradas").select("*").eq("conta_id", conta.id).order("data", { ascending: false }),
+      supabase.from("gastos_variaveis").select("*").eq("conta_id", conta.id).order("data", { ascending: false }),
+    ]);
+
+    const totalEntradas = (entradasConta ?? []).reduce((a, e) => a + Number(e.valor), 0);
+    const totalDebitos = (gastosConta ?? []).filter(g => g.meio === "debito" || g.meio === "pix").reduce((a, g) => a + Number(g.valor), 0);
+    const saldo = Number(conta.saldo_inicial ?? 0) + totalEntradas - totalDebitos;
+
+    const listaEntradas = (entradasConta ?? []).slice(0, 5).map(e => {
+      const d = new Date(e.data + "T12:00:00").toLocaleDateString("pt-BR", { day:"2-digit", month:"2-digit" });
+      return `  + ${d} · ${e.descricao} · ${fmtBRL(e.valor)}`;
+    }).join("\n");
+
+    const listaDebitos = (gastosConta ?? []).slice(0, 5).map(g => {
+      const d = new Date(g.data + "T12:00:00").toLocaleDateString("pt-BR", { day:"2-digit", month:"2-digit" });
+      return `  - ${d} · ${g.descricao} · ${fmtBRL(g.valor)}`;
+    }).join("\n");
+
+    return [
+      `🏦 Extrato — ${conta.nome}`,
+      `Saldo inicial: ${fmtBRL(Number(conta.saldo_inicial ?? 0))}`,
+      ``,
+      `📥 Entradas (${entradasConta?.length ?? 0} · total ${fmtBRL(totalEntradas)}):`,
+      listaEntradas || "  Nenhuma entrada vinculada",
+      ``,
+      `📤 Débitos (${gastosConta?.length ?? 0} · total ${fmtBRL(totalDebitos)}):`,
+      listaDebitos || "  Nenhum débito vinculado",
+      ``,
+      `💰 Saldo atual: ${fmtBRL(saldo)}`,
+    ].join("\n");
   }
 
   // ── listar_contas_e_cartoes ──────────────────────────
