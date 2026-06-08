@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Wallet, Dumbbell, Apple, Settings, Shield, LogOut, X, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Wallet, Heart, Settings, Shield, LogOut, X, HelpCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
   { href: "/",           label: "Dashboard",  icon: LayoutDashboard },
   { href: "/financeiro", label: "Financeiro", icon: Wallet          },
-  { href: "/treinos",    label: "Treinos",    icon: Dumbbell        },
-  { href: "/dieta",      label: "Dieta",      icon: Apple           },
+  { href: "/saude",      label: "Saúde",      icon: Heart           },
 ];
 
 interface Props {

@@ -6,12 +6,14 @@ import { useAuth } from "@/lib/auth-context";
 import ContasBancariasSection from "@/components/configuracoes/ContasBancariasSection";
 import CategoriasSection from "@/components/configuracoes/CategoriasSection";
 import ApiKeysSection from "@/components/configuracoes/ApiKeysSection";
-import { Wallet, Loader2 } from "lucide-react";
+import SaudeSection from "@/components/configuracoes/SaudeSection";
+import { Wallet, Heart, Loader2 } from "lucide-react";
 
-type ModuloConfig = "financeiro";
+type ModuloConfig = "financeiro" | "saude";
 
 const MODULOS: { id: ModuloConfig; label: string; icon: React.ReactNode }[] = [
   { id: "financeiro", label: "Financeiro", icon: <Wallet size={16} /> },
+  { id: "saude",      label: "Saúde",      icon: <Heart size={16} /> },
 ];
 
 export default function Configuracoes() {
@@ -44,23 +46,29 @@ export default function Configuracoes() {
         ))}
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center h-40 gap-3 text-gray-500">
-          <Loader2 size={20} className="animate-spin" />
-          <span className="text-sm">Carregando configurações...</span>
-        </div>
-      ) : modulo === "financeiro" && (
-        <div className="flex flex-col gap-10">
-          <ContasBancariasSection
-            contas={contas} onAdd={addConta} onUpdate={updateConta} onRemove={removeConta}
-          />
-          <div className="border-t border-gray-800" />
-          <CategoriasSection
-            categorias={categorias} onAdd={addCategoria} onUpdate={updateCategoria} onRemove={removeCategoria}
-          />
-          <div className="border-t border-gray-800" />
-          <ApiKeysSection />
-        </div>
+      {modulo === "financeiro" && (
+        loading ? (
+          <div className="flex items-center justify-center h-40 gap-3 text-gray-500">
+            <Loader2 size={20} className="animate-spin" />
+            <span className="text-sm">Carregando configurações...</span>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-10">
+            <ContasBancariasSection
+              contas={contas} onAdd={addConta} onUpdate={updateConta} onRemove={removeConta}
+            />
+            <div className="border-t border-gray-800" />
+            <CategoriasSection
+              categorias={categorias} onAdd={addCategoria} onUpdate={updateCategoria} onRemove={removeCategoria}
+            />
+            <div className="border-t border-gray-800" />
+            <ApiKeysSection />
+          </div>
+        )
+      )}
+
+      {modulo === "saude" && user && (
+        <SaudeSection userId={user.id} />
       )}
     </div>
   );
